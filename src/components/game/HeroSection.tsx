@@ -1,12 +1,15 @@
 import { motion } from 'framer-motion';
-import { Play, BookOpen, Layers } from 'lucide-react';
+import { Play, BookOpen, Layers, ShoppingBag, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PlayerCharacter } from '@/types/game';
+import { PlayerCharacterComponent } from './PlayerCharacter';
 
 interface HeroSectionProps {
-  onNavigate: (page: 'play' | 'learn' | 'cards') => void;
+  onNavigate: (page: 'play' | 'learn' | 'cards' | 'shop') => void;
+  playerCharacter: PlayerCharacter;
 }
 
-export const HeroSection = ({ onNavigate }: HeroSectionProps) => {
+export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background decoration */}
@@ -46,6 +49,34 @@ export const HeroSection = ({ onNavigate }: HeroSectionProps) => {
         💳
       </motion.div>
 
+      {/* Player Character & Stats */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative z-10 mb-6"
+      >
+        <div className="flex flex-col items-center">
+          <PlayerCharacterComponent 
+            character={playerCharacter} 
+            size="lg" 
+            showDetails 
+          />
+          
+          {/* Points display */}
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => onNavigate('shop')}
+            className="mt-4 flex items-center gap-2 bg-primary/20 hover:bg-primary/30 px-4 py-2 rounded-full border border-primary/30 transition-colors"
+          >
+            <Coins className="w-4 h-4 text-primary" />
+            <span className="text-primary font-semibold">{playerCharacter.totalPoints.toLocaleString()} pts</span>
+            <ShoppingBag className="w-4 h-4 text-muted-foreground" />
+          </motion.button>
+        </div>
+      </motion.div>
+
       {/* Main content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -75,7 +106,7 @@ export const HeroSection = ({ onNavigate }: HeroSectionProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap"
         >
           <GameButton
             onClick={() => onNavigate('play')}
@@ -85,18 +116,25 @@ export const HeroSection = ({ onNavigate }: HeroSectionProps) => {
             Start Game
           </GameButton>
           <GameButton
-            onClick={() => onNavigate('learn')}
+            onClick={() => onNavigate('shop')}
             variant="secondary"
+            icon={<ShoppingBag className="w-5 h-5" />}
+          >
+            Customize
+          </GameButton>
+          <GameButton
+            onClick={() => onNavigate('learn')}
+            variant="ghost"
             icon={<BookOpen className="w-5 h-5" />}
           >
-            Learn Budgeting
+            Learn
           </GameButton>
           <GameButton
             onClick={() => onNavigate('cards')}
             variant="ghost"
             icon={<Layers className="w-5 h-5" />}
           >
-            View Cards
+            Cards
           </GameButton>
         </motion.div>
       </motion.div>
@@ -106,10 +144,10 @@ export const HeroSection = ({ onNavigate }: HeroSectionProps) => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="absolute bottom-8 text-center"
+        className="absolute bottom-20 text-center"
       >
         <p className="text-xs text-muted-foreground/50">
-          💡 Tip: Hover over cards to see their magical effects!
+          💡 Defeat the Debt Monster by making smart financial choices!
         </p>
       </motion.div>
     </div>
@@ -129,7 +167,7 @@ const GameButton = ({ children, onClick, variant, icon }: GameButtonProps) => (
     whileTap={{ scale: 0.98 }}
     onClick={onClick}
     className={cn(
-      'inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-lg transition-all',
+      'inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-base transition-all',
       variant === 'primary' && [
         'bg-gradient-to-r from-primary via-primary to-investment',
         'text-primary-foreground',
