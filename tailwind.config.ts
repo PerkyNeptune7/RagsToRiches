@@ -57,28 +57,41 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        // Game-specific colors
+        income: {
+          DEFAULT: "hsl(var(--income))",
+          glow: "hsl(var(--income-glow))",
+        },
+        expense: {
+          DEFAULT: "hsl(var(--expense))",
+          glow: "hsl(var(--expense-glow))",
+        },
+        savings: {
+          DEFAULT: "hsl(var(--savings))",
+          glow: "hsl(var(--savings-glow))",
+        },
+        investment: {
+          DEFAULT: "hsl(var(--investment))",
+          glow: "hsl(var(--investment-glow))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        display: ['Cinzel', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+      },
       keyframes: {
         "accordion-down": {
-          from: {
-            height: "0",
-          },
-          to: {
-            height: "var(--radix-accordion-content-height)",
-          },
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
         },
         "accordion-up": {
-          from: {
-            height: "var(--radix-accordion-content-height)",
-          },
-          to: {
-            height: "0",
-          },
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
         },
       },
       animation: {
