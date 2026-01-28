@@ -1,8 +1,10 @@
+import 'dotenv/config';
+import { MongoClient, ServerApiVersion } from 'mongodb';
+import mongoose from 'mongoose';
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://shitijaggarwal07_db_user:<db_password>@cluster1.jfc1hlj.mongodb.net/?appName=Cluster1";
+const uri = process.env.MONGO_URI;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -10,17 +12,33 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
-
+// Checking database connection 
 async function run() {
   try {
-    // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
-    // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    console.log("🚀 Pinged your deployment. Connection Successful!");
+  } catch (err) {
+    console.error("❌ Connection Failed:", err.message);
   } finally {
-    // Ensures that the client will close when you finish/error
     await client.close();
   }
 }
-run().catch(console.dir);
+run();
+const UserSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  age: { type: Number },
+  appearance: {
+    shirtColor: { type: String, default: 'white' },
+    extraDetail: { type: String, default: 'none' }
+  },
+  stats: {
+    financeKnowledge: { type: Number, default: 0 },
+    happiness: { type: Number, default: 100 },
+    money: { type: Number, default: 1000 }
+  }
+});
+
+// 3. Exporting model 
+export default mongoose.model('User', UserSchema);
