@@ -1,0 +1,192 @@
+[
+  {
+    "_id": "situation_001",
+    "situation": "Your laptop suddenly stops working mid-semester. You need one for assignments. What do you do?",
+    "choices": [
+      {
+        "text": "Buy a brand-new high-end laptop ($2,000)",
+        "effect": {
+          "money": -2000,
+          "financeKnowledge": -10,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Buy a reliable refurbished laptop ($1,000)",
+        "effect": {
+          "money": -1000,
+          "financeKnowledge": 20,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Repair your current laptop ($250)",
+        "effect": {
+          "money": -250,
+          "financeKnowledge": 20,
+          "happiness": -10
+        }
+      },
+      {
+        "text": "Put a new laptop on your credit card ($2,000 + interest)",
+        "effect": {
+          "money": -2200,
+          "financeKnowledge": -20,
+          "happiness": 10
+        }
+      }
+    ]
+  },
+  {
+    "_id": "situation_002",
+    "situation": "Your roommate says they're short on rent and asks you to cover their share this month ($650).",
+    "choices": [
+      {
+        "text": "Cover the full $650 with no questions",
+        "effect": {
+          "money": -650,
+          "financeKnowledge": -10,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Say no and tell them to figure it out",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": 20,
+          "happiness": -10
+        }
+      },
+      {
+        "text": "Cover part of it ($250) and they find the rest",
+        "effect": {
+          "money": -250,
+          "financeKnowledge": 10,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Cover $650 but only with a written repayment plan",
+        "effect": {
+          "money": -650,
+          "financeKnowledge": 20,
+          "happiness": -10
+        }
+      }
+    ]
+  },
+  {
+    "_id": "situation_003",
+    "situation": "You and your friends are meeting downtown. You need to choose how to get there and back.",
+    "choices": [
+      {
+        "text": "Take TTC both ways ($6.60)",
+        "effect": {
+          "money": -6.60,
+          "financeKnowledge": 20,
+          "happiness": -10
+        }
+      },
+      {
+        "text": "Take Uber both ways ($40)",
+        "effect": {
+          "money": -40,
+          "financeKnowledge": -10,
+          "happiness": 20
+        }
+      },
+      {
+        "text": "Take TTC there and Uber back ($23)",
+        "effect": {
+          "money": -23,
+          "financeKnowledge": 20,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Carpool with a friend and split gas ($12)",
+        "effect": {
+          "money": -12,
+          "financeKnowledge": 10,
+          "happiness": 10
+        }
+      }
+    ]
+  },
+  {
+    "_id": "situation_004",
+    "situation": "Your bank offers to increase your credit limit from $1,000 to $3,000.",
+    "choices": [
+      {
+        "text": "Accept it and keep spending the same as before",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": 10,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Accept it and start spending more because you 'can'",
+        "effect": {
+          "money": -50,
+          "financeKnowledge": -20,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Decline it because higher limits are 'dangerous'",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": -10,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Accept it and lower utilization by paying earlier",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": 20,
+          "happiness": 10
+        }
+      }
+    ]
+  },
+  {
+    "_id": "situation_005",
+    "situation": "You get a text saying 'CRA: You are eligible for a refund. Click this link to deposit $243.18.'",
+    "choices": [
+      {
+        "text": "Click the link and enter your banking info",
+        "effect": {
+          "money": -243.18,
+          "financeKnowledge": -20,
+          "happiness": -20
+        }
+      },
+      {
+        "text": "Don't click it, check your CRA account directly",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": 20,
+          "happiness": 10
+        }
+      },
+      {
+        "text": "Reply asking if it's real",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": 10,
+          "happiness": -10
+        }
+      },
+      {
+        "text": "Forward the message to a friend to ask what they think",
+        "effect": {
+          "money": 0,
+          "financeKnowledge": -10,
+          "happiness": -10
+        }
+      }
+    ]
+  }
+]
