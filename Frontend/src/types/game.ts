@@ -1,5 +1,51 @@
+// src/types/game.ts
+
+export const API_URL = "http://localhost:8080/api";
+
+// ==========================================
+// 1. NEW BACKEND INTEGRATION TYPES
+// (Matches your Java User & Card Models)
+// ==========================================
+
+export interface BackendStats {
+  money: number;
+  happiness: number;
+  financeKnowledge: number;
+}
+
+export interface BackendUser {
+  id: string; // MongoDB _id
+  name: string;
+  avatar: string; // e.g. "white-shirt"
+  stats: BackendStats;
+  overallScore: number;
+}
+
+export interface Effect {
+  money: number;
+  happiness: number;
+  financeKnowledge: number;
+}
+
+export interface Choice {
+  text: string;
+  effect: Effect;
+}
+
+export interface SituationCard {
+  id: string;
+  situation: string;
+  image?: string;
+  choices: Choice[];
+}
+
+// ==========================================
+// 2. EXISTING UI TYPES (Preserved)
+// ==========================================
+
 export type CardCategory = 'income' | 'expense' | 'savings' | 'investment';
 
+// Kept for backward compatibility if your UI uses it
 export interface BudgetCard {
   id: string;
   name: string;
@@ -12,26 +58,23 @@ export interface BudgetCard {
 }
 
 export interface GameState {
-  budget: number;
-  score: number;
+  // New Stats (Synced with Backend)
+  stats: BackendStats; 
+  
+  // Legacy UI State (Keep these for animations/rounds)
   round: number;
   maxRounds: number;
-  currentCards: BudgetCard[];
-  playedCards: BudgetCard[];
-  savings: number;
-  investments: number;
+  currentSituation: SituationCard | null; // The active card from DB
+  
+  // Optional: Keep these if your UI calculates monthly flows locally
   monthlyIncome: number;
   monthlyExpenses: number;
 }
 
-export interface PlayerStats {
-  totalGamesPlayed: number;
-  highScore: number;
-  cardsPlayed: number;
-  bestStreak: number;
-}
+// ==========================================
+// 3. CHARACTER SYSTEM (Merged)
+// ==========================================
 
-// Character System Types
 export type CharacterOutfit = 'default' | 'business' | 'casual' | 'fancy' | 'sporty' | 'student';
 export type CharacterHouse = 'apartment' | 'house' | 'mansion' | 'penthouse' | 'cottage';
 export type CharacterAccessory = 'none' | 'glasses' | 'hat' | 'watch' | 'briefcase' | 'backpack';
@@ -49,14 +92,18 @@ export interface CustomizationItem {
 }
 
 export interface PlayerCharacter {
-  name: string;
+  // Visuals (Frontend Only)
   outfit: CharacterOutfit;
   house: CharacterHouse;
   accessory: CharacterAccessory;
   skinColor: CharacterSkinColor;
-  level: number;
-  totalPoints: number;
-  unlockedItems: string[];
+  
+  // Data (Synced with Backend)
+  id?: string;
+  name: string;
+  level: number;       // Can map to financeKnowledge / 10
+  totalPoints: number; // Maps to overallScore
+  stats: BackendStats; // The real numbers from Java
 }
 
 export interface EvilCharacter {
