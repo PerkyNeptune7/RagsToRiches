@@ -27,7 +27,7 @@ export const ImpulseDemon = ({ state }: DemonProps) => {
             x: 0,
             rotate: 0,
             filter: "drop-shadow(0px 0px 10px rgba(168, 85, 247, 0.6))",
-            transition: { duration: 3, repeat: Infinity, ease: "easeInOut" }
+            transition: { duration: 3, repeat: Infinity, ease: "easeInOut" as const }
         },
         laughing: {
             scale: [1, 1.1, 1],
@@ -55,7 +55,7 @@ export const ImpulseDemon = ({ state }: DemonProps) => {
             y: 15,
             x: 5,
             rotate: 10,
-            transition: { duration: 0.4, type: "spring" }
+            transition: { duration: 0.4, type: "spring" as const }
         }
     };
 
@@ -93,7 +93,7 @@ export const ImpulseDemon = ({ state }: DemonProps) => {
         scared: {
             opacity: [0, 1, 0],
             y: [0, 15],
-            transition: { duration: 1, repeat: Infinity, ease: "easeOut" }
+            transition: { duration: 1, repeat: Infinity, ease: "easeOut" as const }
         }
     };
 
