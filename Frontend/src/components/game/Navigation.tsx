@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Home, Gamepad2, BookOpen, Layers, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
+import React from 'react';
 type Page = 'home' | 'play' | 'learn' | 'cards' | 'shop';
 
 interface NavigationProps {
@@ -38,8 +38,8 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
               onClick={() => onNavigate(item.id)}
               className={cn(
                 'relative flex flex-col items-center gap-0.5 px-2 sm:px-4 py-1.5 sm:py-2 rounded-xl transition-all',
-                isActive 
-                  ? 'text-primary' 
+                isActive
+                  ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               )}
             >
