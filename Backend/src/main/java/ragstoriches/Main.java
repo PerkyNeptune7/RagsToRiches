@@ -1,3 +1,5 @@
+package ragstoriches;
+
 import io.github.cdimascio.dotenv.Dotenv;
 import ragstoriches.Api.GameApi;
 import ragstoriches.database.MongoDB;
