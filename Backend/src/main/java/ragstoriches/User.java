@@ -1,3 +1,5 @@
+package ragstoriches;
+
 import org.bson.codecs.pojo.annotations.BsonId;
 
 public class User {
@@ -21,8 +23,6 @@ public class User {
                     this.stats.happiness;
         }
     }
-
-    // ... getters and setters ...
 
     // ---------------------------------------------------------
     // FIX: Must be 'public static' so Mongo can create them
