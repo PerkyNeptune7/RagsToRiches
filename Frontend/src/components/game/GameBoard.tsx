@@ -79,6 +79,17 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
     };
     setStats(newStats);
 
+    const playSoundEffect = (type: 'hero' | 'villain') => {
+      // Use the path relative to the public folder
+      const path = type === 'hero' ? '/sounds/hero.mp3' : '/sounds/villain.mp3';
+      const audio = new Audio(path);
+
+      audio.volume = 0.5; // Set volume (0.0 to 1.0)
+
+      // Play and catch errors (e.g., if user hasn't interacted with page yet)
+      audio.play().catch((err) => console.warn("Audio play failed:", err));
+    };
+
     // 4. === ANIMATION LOGIC (Based on Score) ===
 
     // Threshold: Score > 0 is GOOD (Hero Dance), Score <= 0 is BAD (Villain Dance)
@@ -87,6 +98,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
     if (!isGoodTurn) {
       // --- VILLAIN DANCE ---
       setIsEvilAttacking(true);
+      playSoundEffect('villain');
       setPlayerReaction('sad');
       setBattleMessage(`😈 ${evilCharacter?.name} laughs at your mistake!`);
 
@@ -98,6 +110,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
     } else {
       // --- HERO DANCE ---
       setIsEvilAttacking(false);
+      playSoundEffect('hero');
       setPlayerReaction('happy'); // Triggers Zoom/Dance
 
       // Visual Damage to Villain
