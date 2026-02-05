@@ -4,6 +4,7 @@ import { GameCard } from './GameCard';
 import { PlayerCharacterComponent } from './PlayerCharacter';
 import { VillainCharacter, VillainState } from './VillainCharacter';
 import { JourneyTrack } from './JourneyTrack';
+import { getCleanSummary, calculateTurnScore, parseCash, parseSymbol } from '@/utils/gameLogic'; // Import helpers
 
 import {
   PlayerCharacter,
@@ -40,7 +41,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   const [evilCharacter, setEvilCharacter] = useState<EvilCharacter | null>(null);
   const [evilHealth, setEvilHealth] = useState(100);
   const [evilMaxHealth] = useState(100);
-  const [isEvilAttacking, setIsEvilAttacking] = useState(false); // Controls Villain Zoom
+  const [isEvilAttacking, setIsEvilAttacking] = useState(false);
   const [damageDealt, setDamageDealt] = useState<number | undefined>(undefined);
   const [battleMessage, setBattleMessage] = useState<string>('');
 
@@ -50,10 +51,9 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
     setEvilHealth(evil.power);
   }, []);
 
-  // Determine Villain Animation State
   const getVillainState = (): VillainState => {
-    if (isEvilAttacking) return 'laughing'; // Triggers Villain Zoom Overlay
-    if (damageDealt && damageDealt > 0) return 'scared'; // Triggers Scared Animation (In-place)
+    if (isEvilAttacking) return 'laughing';
+    if (damageDealt && damageDealt > 0) return 'scared';
     return 'idle';
   };
 
@@ -63,66 +63,57 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
     if (gameOver || isProcessing) return;
     setIsProcessing(true);
 
-    // 1. Update Stats
+    // 1. Calculate Score using the Helper Formula
+    const turnScore = calculateTurnScore(choice.effect);
+
+    // 2. Parse Stats (Strings -> Numbers)
+    const moneyChange = parseCash(choice.effect.money);
+    const hapChange = parseSymbol(choice.effect.happiness);
+    const knwChange = parseSymbol(choice.effect.financeKnowledge);
+
+    // 3. Update Stats
     const newStats = {
-      money: stats.money + choice.effect.money,
-      happiness: stats.happiness + choice.effect.happiness,
-      financeKnowledge: stats.financeKnowledge + choice.effect.financeKnowledge,
+      money: stats.money + moneyChange,
+      happiness: stats.happiness + hapChange,
+      financeKnowledge: stats.financeKnowledge + knwChange,
     };
     setStats(newStats);
 
-    // 2. === MUTUAL EXCLUSIVITY LOGIC ===
-    // We prioritize "Bad News" (Villain) over "Good News" (Hero) if both happen,
-    // to prevent two cutscenes from playing at once.
+    // 4. === ANIMATION LOGIC (Based on Score) ===
 
-    const isBadFinancialMove = choice.effect.money < 0;
-    const isGoodFinancialMove = choice.effect.money > 0 || choice.effect.financeKnowledge > 0;
+    // Threshold: Score > 0 is GOOD (Hero Dance), Score <= 0 is BAD (Villain Dance)
+    const isGoodTurn = turnScore > 0;
 
-    if (isBadFinancialMove) {
-      // --- SCENARIO A: VILLAIN TAKES THE SCREEN ---
+    if (!isGoodTurn) {
+      // --- VILLAIN DANCE ---
+      setIsEvilAttacking(true);
+      setPlayerReaction('sad');
+      setBattleMessage(`😈 ${evilCharacter?.name} laughs at your mistake!`);
 
-      setIsEvilAttacking(true); // 1. Trigger Villain Zoom
-      setPlayerReaction('sad'); // 2. Player looks sad (No zoom)
-
-      setBattleMessage(`😈 ${evilCharacter?.name} laughs at your spending!`);
-
-      // Reset after animation
       setTimeout(() => {
         setIsEvilAttacking(false);
         setPlayerReaction('neutral');
       }, 2500);
 
-    } else if (isGoodFinancialMove) {
-      // --- SCENARIO B: HERO TAKES THE SCREEN ---
+    } else {
+      // --- HERO DANCE ---
+      setIsEvilAttacking(false);
+      setPlayerReaction('happy'); // Triggers Zoom/Dance
 
-      setIsEvilAttacking(false); // 1. Ensure Villain stays put
-      setPlayerReaction('happy'); // 2. Trigger Player Zoom/Dance
-
-      // Calculate damage to villain (Visual only)
-      let damage = 10;
-      if (choice.effect.financeKnowledge > 0) damage += 15;
+      // Visual Damage to Villain
+      const damage = Math.min(turnScore * 5, 20); // Scale score to damage
       setDamageDealt(damage);
       setEvilHealth(prev => Math.max(0, prev - damage));
 
-      setBattleMessage("🎉 Great Choice! You're taking control!");
+      setBattleMessage("🎉 Great Choice! You're winning!");
 
-      // Reset after animation
       setTimeout(() => {
         setPlayerReaction('neutral');
         setDamageDealt(undefined);
       }, 2500);
-
-    } else {
-      // --- SCENARIO C: NEUTRAL/THINKING ---
-      if (choice.effect.financeKnowledge > 0) {
-        setPlayerReaction('thinking');
-      } else {
-        setPlayerReaction('neutral');
-      }
-      setTimeout(() => setPlayerReaction('neutral'), 1500);
     }
 
-    // 3. Move to Next Card
+    // 5. Next Card
     setTimeout(() => {
       setDamageDealt(undefined);
       setBattleMessage('');
@@ -133,7 +124,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
       } else {
         finishGame(newStats);
       }
-    }, 2500); // Wait for the zoom animations to finish
+    }, 2500);
   };
 
   const finishGame = (finalStats: typeof stats) => {
@@ -147,25 +138,20 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   return (
     <div className="min-h-screen bg-background p-4 flex flex-col max-w-6xl mx-auto overflow-hidden">
 
-      {/* 2. INSERT TRACK HERE (Top of the screen) */}
       <JourneyTrack
         currentRound={currentCardIndex}
         totalRounds={cards.length}
         character={playerCharacter}
       />
 
-      {/* === BATTLE HEADER === */}
+      {/* HEADER: PLAYER vs VILLAIN */}
       <motion.div className="flex justify-between items-start mb-4 px-2 pt-4 relative z-10">
-
-        {/* PLAYER (Left) */}
-        {/* NOTE: If playerReaction is 'happy', this component handles the Fullscreen Zoom internally */}
         <PlayerCharacterComponent
           character={playerCharacter}
           size="sm"
           reaction={playerReaction}
         />
 
-        {/* CENTER INFO */}
         <div className="mt-4 flex flex-col items-center z-10">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
@@ -191,8 +177,6 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
           </AnimatePresence>
         </div>
 
-        {/* VILLAIN (Right) */}
-        {/* NOTE: If state is 'laughing', this component handles the Fullscreen Zoom internally */}
         {evilCharacter && (
           <div className="flex-shrink-0">
             <VillainCharacter
@@ -206,36 +190,38 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
         )}
       </motion.div>
 
-      {/* === STATS BAR === */}
+      {/* STATS */}
       <div className="flex justify-center gap-4 mb-8">
         <StatCard icon={<DollarSign className="w-4 h-4" />} label="Money" value={`$${stats.money}`} color={stats.money > 0 ? 'text-green-500' : 'text-red-500'} />
         <StatCard icon={<Brain className="w-4 h-4" />} label="Knowledge" value={`${stats.financeKnowledge}`} color="text-blue-500" />
         <StatCard icon={<PiggyBank className="w-4 h-4" />} label="Happy" value={`${stats.happiness}`} color="text-yellow-500" />
       </div>
 
-      {/* === CARD AREA === */}
+      {/* CARD AREA */}
       {!gameOver && activeCard && (
         <div className="flex-1 flex flex-col items-center">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            key={activeCard.id}
+            key={activeCard.id} // Ensure this matches your ID field (_id or situationId)
             className="mb-8 text-center max-w-2xl bg-secondary/30 p-6 rounded-2xl border border-border backdrop-blur-sm shadow-sm"
           >
             <h2 className="font-display text-xl md:text-2xl leading-relaxed">
-              &quot;{activeCard.situation}&quot;
+              &quot;{activeCard.scenario}&quot;
             </h2>
           </motion.div>
 
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 perspective-1000">
             <AnimatePresence mode="wait">
-              {activeCard.choices.map((choice, idx) => (
+              {activeCard.options.map((choice, idx) => (
                 <GameCard
-                  key={`${activeCard.id}-choice-${idx}`}
+                  key={`choice-${idx}`}
                   choice={choice}
                   index={idx}
                   onClick={handleChoice}
                   disabled={isProcessing}
+                  // ✨ NEW: Pass the clean summary here!
+                  subtitle={getCleanSummary(choice.effect)}
                 />
               ))}
             </AnimatePresence>
@@ -243,7 +229,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
         </div>
       )}
 
-      {/* === GAME OVER === */}
+      {/* GAME OVER */}
       <AnimatePresence>
         {gameOver && (
           <motion.div
@@ -262,8 +248,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   );
 };
 
-// Helper
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// Simple Stat Card Helper
 const StatCard = ({ icon, value, color }: any) => (
   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border shadow-sm min-w-[100px] justify-center">
     <div className={cn('p-1.5 rounded-md bg-secondary', color)}>{icon}</div>

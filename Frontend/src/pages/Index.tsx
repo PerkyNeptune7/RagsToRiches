@@ -8,8 +8,8 @@ import { Navigation } from '@/components/game/Navigation';
 import { CharacterShop } from '@/components/game/CharacterShop';
 import { PlayerCharacter, CustomizationItem, BackendUser, SituationCard } from '@/types/game';
 import { api } from "@/hooks/Api"; // Ensure this matches where you created api.ts
-import { toast } from "sonner"; 
-
+import { toast } from "sonner";
+import React from 'react';
 type Page = 'home' | 'play' | 'learn' | 'cards' | 'shop';
 
 // Default visuals (Backend doesn't store clothes yet, so we keep this local)
@@ -24,7 +24,7 @@ const defaultVisuals = {
 const Index = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [loading, setLoading] = useState(true);
-  
+
   // 1. NEW: State to hold the cards fetched from MongoDB
   const [cards, setCards] = useState<SituationCard[]>([]);
 
@@ -33,14 +33,14 @@ const Index = () => {
     // Try to load local visuals (clothes/skin)
     const saved = localStorage.getItem('budgetquest-character');
     const parsed = saved ? JSON.parse(saved) : {};
-    
+
     // Return merged object (Default Stats + Saved Visuals)
     return {
       name: 'Student',
       ...defaultVisuals,
-      ...parsed, 
+      ...parsed,
       level: 1,
-      totalPoints: 0, 
+      totalPoints: 0,
       stats: { money: 1000, happiness: 50, financeKnowledge: 0 }
     };
   });
@@ -52,7 +52,7 @@ const Index = () => {
     const loadBackendData = async () => {
       try {
         const userId = "test-student-001"; // Hardcoded for prototype
-        
+
         // FETCH BOTH USER AND CARDS
         const [backendUser, backendCards] = await Promise.all([
           api.getProfile(userId),
@@ -66,15 +66,15 @@ const Index = () => {
             name: backendUser.name,
             totalPoints: Math.round(backendUser.overallScore),
             level: Math.floor(backendUser.stats.financeKnowledge / 100) + 1,
-            stats: backendUser.stats 
+            stats: backendUser.stats
           }));
           toast.success("Sync successful: Profile loaded!");
         }
 
         // B. Sync Cards
         if (backendCards && backendCards.length > 0) {
-            setCards(backendCards);
-            console.log("🃏 Cards loaded from DB:", backendCards);
+          setCards(backendCards);
+          console.log("🃏 Cards loaded from DB:", backendCards);
         }
 
       } catch (err) {
@@ -114,23 +114,27 @@ const Index = () => {
     setPlayerCharacter(prev => {
       const newTotalPoints = prev.totalPoints + Math.round(score);
       const newLevel = Math.floor(newTotalPoints / 500) + 1;
-      
+
       // B. Create the payload for Java
       const userToSave: BackendUser = {
         id: "test-student-001",
         name: prev.name,
-        avatar: prev.outfit, 
+        // Map local 'outfit' to backend 'appearance'
+        appearance: {
+          shirtColor: prev.outfit,
+          extraDetail: prev.accessory
+        },
         overallScore: newTotalPoints,
         stats: {
-            money: prev.stats.money, 
-            happiness: prev.stats.happiness,
-            financeKnowledge: prev.stats.financeKnowledge + 10 
+          money: prev.stats.money,
+          happiness: prev.stats.happiness,
+          financeKnowledge: prev.stats.financeKnowledge + 10
         }
       };
 
       // C. Send to Backend
       api.saveProfile(userToSave).then(() => {
-         toast.success("Progress Saved to Database!");
+        toast.success("Progress Saved to Database!");
       });
 
       return {
@@ -154,7 +158,7 @@ const Index = () => {
       });
       toast.success(`Bought ${item.name}!`);
     } else {
-        toast.error("Not enough points!");
+      toast.error("Not enough points!");
     }
   };
 
@@ -179,8 +183,8 @@ const Index = () => {
         >
           {currentPage === 'home' && (
             <>
-              <HeroSection 
-                onNavigate={handleNavigate} 
+              <HeroSection
+                onNavigate={handleNavigate}
                 playerCharacter={playerCharacter}
               />
 
@@ -189,12 +193,12 @@ const Index = () => {
                 <div className="mx-auto mt-8 max-w-2xl rounded-xl border border-yellow-400 bg-yellow-50 p-6 shadow-md">
                   <h3 className="mb-2 text-lg font-bold text-yellow-800">🔌 MongoDB Connection Test</h3>
                   <p className="text-sm text-yellow-700">Successfully fetched {cards.length} cards from Atlas:</p>
-                  
+
                   <div className="mt-4 rounded bg-white p-4 shadow-sm border border-yellow-200">
                     <p className="font-semibold text-gray-800">Situation #1 Preview:</p>
-                    <p className="text-lg italic text-gray-600">"{cards[0].situation}"</p>
+                    <p className="text-lg italic text-gray-600">"{cards[0].scenario}"</p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {cards[0].choices.map((c, i) => (
+                      {cards[0].options.map((c, i) => (
                         <span key={i} className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
                           Option: {c.text}
                         </span>
@@ -207,7 +211,7 @@ const Index = () => {
           )}
 
           {currentPage === 'play' && (
-            <GameBoard 
+            <GameBoard
               playerCharacter={playerCharacter}
               onGameEnd={handleGameEnd}
               cards={cards}
@@ -230,7 +234,7 @@ const Index = () => {
           />
         )}
       </AnimatePresence>
-      
+
       <Navigation currentPage={currentPage} onNavigate={setCurrentPage} />
     </div>
   );
