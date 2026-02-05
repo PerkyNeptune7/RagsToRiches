@@ -57,12 +57,12 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
         className="relative z-10 mb-6"
       >
         <div className="flex flex-col items-center">
-          <PlayerCharacterComponent 
-            character={playerCharacter} 
-            size="lg" 
-            showDetails 
+          <PlayerCharacterComponent
+            character={playerCharacter}
+            size="lg"
+            showDetails
           />
-          
+
           {/* Points display */}
           <motion.button
             whileHover={{ scale: 1.05 }}
@@ -91,7 +91,7 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <h1 className="font-display text-5xl md:text-7xl mb-4 text-gradient-gold">
-            Budget Quest
+            Cash Quest
           </h1>
           <p className="text-xl md:text-2xl text-muted-foreground mb-2">
             Master Your Money

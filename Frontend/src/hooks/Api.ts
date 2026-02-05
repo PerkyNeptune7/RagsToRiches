@@ -59,5 +59,29 @@ export const api = {
       console.error("❌ API Error: Failed to fetch leaderboard", error);
       return [];
     }
+  },
+
+  
+  makeChoice: async (userId: string, situationId: number, choiceIndex: number): Promise<BackendUser | null> => {
+    try {
+      const response = await fetch(`${API_URL}/choose`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // ⚠️ CRITICAL: Must match Java 'ChoiceRequest' class fields!
+        body: JSON.stringify({ 
+          userId: userId, 
+          situationId: situationId, 
+          choiceIndex: choiceIndex 
+        }),
+      });
+
+      if (!response.ok) throw new Error("Choice processing failed");
+      
+      // Returns the UPDATED User object (with new money/happiness)
+      return await response.json();
+    } catch (error) {
+      console.error("❌ API Error:", error);
+      return null;
+    }
   }
 };

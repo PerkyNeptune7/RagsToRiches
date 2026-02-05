@@ -1,36 +1,43 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-// import { GameCard } from './GameCard'; // REMOVED: We need a custom layout for Situations
+import { GameCard } from './GameCard';
 import { PlayerCharacterComponent } from './PlayerCharacter';
-import { EvilCharacterComponent } from './EvilCharacter';
-import { GameState, PlayerCharacter, EvilCharacter, SituationCard, Choice } from '@/types/game';
+import { VillainCharacter, VillainState } from './VillainCharacter';
+import { JourneyTrack } from './JourneyTrack';
+import { getCleanSummary, calculateTurnScore, parseCash, parseSymbol } from '@/utils/gameLogic'; // Import helpers
+
+import {
+  PlayerCharacter,
+  EvilCharacter,
+  SituationCard,
+  Choice,
+  BackendStats
+} from '@/types/game';
 import { getRandomEvilCharacter } from '@/data/customization';
 import { cn } from '@/lib/utils';
-import { toast } from "sonner";
-import { 
-  DollarSign, 
-  TrendingUp, 
-  PiggyBank, 
-  Trophy,
-  RotateCcw,
-  Sparkles,
+import {
+  DollarSign,
+  PiggyBank,
   Swords,
   Brain
 } from 'lucide-react';
 
 interface GameBoardProps {
   playerCharacter: PlayerCharacter;
-  cards: SituationCard[]; // <-- Updated to receive MongoDB cards
+  cards: SituationCard[];
   onGameEnd: (score: number) => void;
 }
 
 export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps) => {
-  // 1. Core State
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [stats, setStats] = useState(playerCharacter.stats);
+  const [stats, setStats] = useState<BackendStats>(playerCharacter.stats);
   const [gameOver, setGameOver] = useState(false);
-  
-  // 2. Battle State (Visuals)
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // === ANIMATION STATES ===
+  const [playerReaction, setPlayerReaction] = useState<'neutral' | 'happy' | 'thinking' | 'sad'>('neutral');
+
+  // === BATTLE STATES ===
   const [evilCharacter, setEvilCharacter] = useState<EvilCharacter | null>(null);
   const [evilHealth, setEvilHealth] = useState(100);
   const [evilMaxHealth] = useState(100);
@@ -38,255 +45,201 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   const [damageDealt, setDamageDealt] = useState<number | undefined>(undefined);
   const [battleMessage, setBattleMessage] = useState<string>('');
 
-  // 3. Initialize Battle
   useEffect(() => {
-    // Pick a random enemy for this session
-    const evil = getRandomEvilCharacter(); 
+    const evil = getRandomEvilCharacter();
     setEvilCharacter(evil);
     setEvilHealth(evil.power);
   }, []);
 
+  const getVillainState = (): VillainState => {
+    if (isEvilAttacking) return 'laughing';
+    if (damageDealt && damageDealt > 0) return 'scared';
+    return 'idle';
+  };
+
   const activeCard = cards[currentCardIndex];
 
-  // 4. Handle User Selection
   const handleChoice = (choice: Choice) => {
-    if (gameOver) return;
+    if (gameOver || isProcessing) return;
+    setIsProcessing(true);
 
-    // A. Calculate New Stats
+    // 1. Calculate Score using the Helper Formula
+    const turnScore = calculateTurnScore(choice.effect);
+
+    // 2. Parse Stats (Strings -> Numbers)
+    const moneyChange = parseCash(choice.effect.money);
+    const hapChange = parseSymbol(choice.effect.happiness);
+    const knwChange = parseSymbol(choice.effect.financeKnowledge);
+
+    // 3. Update Stats
     const newStats = {
-      money: stats.money + choice.effect.money,
-      happiness: stats.happiness + choice.effect.happiness,
-      financeKnowledge: stats.financeKnowledge + choice.effect.financeKnowledge,
+      money: stats.money + moneyChange,
+      happiness: stats.happiness + hapChange,
+      financeKnowledge: stats.financeKnowledge + knwChange,
     };
     setStats(newStats);
 
-    // B. Calculate "Battle Damage" (Gamification)
-    // Good choices (gaining knowledge/money) hurt the monster!
-    let damage = 0;
-    if (choice.effect.financeKnowledge > 0) damage += 25; // Learning hurts ignorance!
-    if (choice.effect.money > 0) damage += 15; // Income hurts debt monsters!
-    if (choice.effect.money < 0) {
-        // Spending gives the monster power (minor heal or attack)
-        setIsEvilAttacking(true);
-        setTimeout(() => setIsEvilAttacking(false), 500);
-        setBattleMessage(`😈 ${evilCharacter?.name} feeds on your spending!`);
-    }
+    // 4. === ANIMATION LOGIC (Based on Score) ===
 
-    // C. Apply Damage
-    if (damage > 0) {
-        setDamageDealt(damage);
-        setEvilHealth(prev => Math.max(0, prev - damage));
-        setBattleMessage(`💥 Critical Hit! You dealt ${damage} damage!`);
-    }
+    // Threshold: Score > 0 is GOOD (Hero Dance), Score <= 0 is BAD (Villain Dance)
+    const isGoodTurn = turnScore > 0;
 
-    // D. Advance Game
-    if (currentCardIndex + 1 < cards.length) {
-        setTimeout(() => {
-            setDamageDealt(undefined);
-            setCurrentCardIndex(prev => prev + 1);
-        }, 1200); // Delay slightly to read the battle text
+    if (!isGoodTurn) {
+      // --- VILLAIN DANCE ---
+      setIsEvilAttacking(true);
+      setPlayerReaction('sad');
+      setBattleMessage(`😈 ${evilCharacter?.name} laughs at your mistake!`);
+
+      setTimeout(() => {
+        setIsEvilAttacking(false);
+        setPlayerReaction('neutral');
+      }, 2500);
+
     } else {
-        finishGame(newStats);
+      // --- HERO DANCE ---
+      setIsEvilAttacking(false);
+      setPlayerReaction('happy'); // Triggers Zoom/Dance
+
+      // Visual Damage to Villain
+      const damage = Math.min(turnScore * 5, 20); // Scale score to damage
+      setDamageDealt(damage);
+      setEvilHealth(prev => Math.max(0, prev - damage));
+
+      setBattleMessage("🎉 Great Choice! You're winning!");
+
+      setTimeout(() => {
+        setPlayerReaction('neutral');
+        setDamageDealt(undefined);
+      }, 2500);
     }
+
+    // 5. Next Card
+    setTimeout(() => {
+      setDamageDealt(undefined);
+      setBattleMessage('');
+      setIsProcessing(false);
+
+      if (currentCardIndex + 1 < cards.length) {
+        setCurrentCardIndex(prev => prev + 1);
+      } else {
+        finishGame(newStats);
+      }
+    }, 2500);
   };
 
   const finishGame = (finalStats: typeof stats) => {
     setGameOver(true);
     const finalScore = finalStats.money + (finalStats.happiness * 10) + (finalStats.financeKnowledge * 20);
-    
-    // Check if we defeated the boss
-    if (evilHealth <= 0) {
-        toast.success(`You defeated ${evilCharacter?.name}!`);
-    } else {
-        toast.info("Game Over!");
-    }
-
-    // Delay for dramatic effect
-    setTimeout(() => {
-        onGameEnd(finalScore);
-    }, 2000);
-  };
-
-  const resetGame = () => {
-    window.location.reload(); // Simple reload to re-fetch fresh data
-  };
-
-  const getGrade = (score: number) => {
-    if (score >= 5000) return { grade: 'A+', message: 'Financial Genius!', color: 'text-green-500' };
-    if (score >= 3000) return { grade: 'B', message: 'Solid Choices!', color: 'text-blue-500' };
-    return { grade: 'C', message: 'Keep Learning!', color: 'text-yellow-500' };
+    setTimeout(() => onGameEnd(finalScore), 2500);
   };
 
   if (!activeCard && !gameOver) return <div className="p-10 text-center">Loading Situations...</div>;
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-6 flex flex-col max-w-5xl mx-auto">
-      
-      {/* --- SECTION 1: BATTLE HEADER --- */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-start mb-6 gap-4"
-      >
-        {/* You */}
-        <div className="flex-shrink-0">
-            <div className="text-center mb-2 font-bold text-sm text-primary">YOU</div>
-            <PlayerCharacterComponent 
-                character={playerCharacter} 
-                size="sm" 
-                showDetails={false}
-            />
+    <div className="min-h-screen bg-background p-4 flex flex-col max-w-6xl mx-auto overflow-hidden">
+
+      <JourneyTrack
+        currentRound={currentCardIndex}
+        totalRounds={cards.length}
+        character={playerCharacter}
+      />
+
+      {/* HEADER: PLAYER vs VILLAIN */}
+      <motion.div className="flex justify-between items-start mb-4 px-2 pt-4 relative z-10">
+        <PlayerCharacterComponent
+          character={playerCharacter}
+          size="sm"
+          reaction={playerReaction}
+        />
+
+        <div className="mt-4 flex flex-col items-center z-10">
+          <motion.div
+            animate={{ scale: [1, 1.1, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="flex items-center gap-2 bg-secondary/80 backdrop-blur px-4 py-1 rounded-full border border-border"
+          >
+            <Swords className="w-4 h-4 text-primary" />
+            <span className="font-bold text-xs">ROUND {currentCardIndex + 1}/{cards.length}</span>
+          </motion.div>
+
+          <AnimatePresence mode="wait">
+            {battleMessage && (
+              <motion.span
+                key={battleMessage}
+                initial={{ opacity: 0, y: 10, scale: 0.8 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0 }}
+                className="mt-2 text-sm font-bold text-white bg-slate-900/90 px-3 py-1 rounded-full shadow-lg border border-slate-700"
+              >
+                {battleMessage}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
 
-        {/* VS Badge */}
-        <motion.div 
-          animate={{ scale: [1, 1.1, 1] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="mt-8 flex items-center gap-2 bg-gradient-to-r from-primary/20 to-red-500/20 px-4 py-2 rounded-full border border-border"
-        >
-          <Swords className="w-5 h-5 text-primary" />
-          <span className="font-display text-sm font-bold">VS</span>
-        </motion.div>
-
-        {/* Enemy */}
         {evilCharacter && (
           <div className="flex-shrink-0">
-             <div className="text-center mb-2 font-bold text-sm text-red-500">ENEMY</div>
-            <EvilCharacterComponent 
+            <VillainCharacter
               character={evilCharacter}
-              isAttacking={isEvilAttacking}
-              damage={damageDealt}
+              state={getVillainState()}
               health={evilHealth}
               maxHealth={evilMaxHealth}
+              damage={damageDealt}
             />
           </div>
         )}
       </motion.div>
 
-      {/* --- SECTION 2: BATTLE LOG --- */}
-      <AnimatePresence mode="wait">
-        <motion.div
-            key={battleMessage}
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="h-8 text-center mb-4"
-        >
-            {battleMessage && (
-            <span className="inline-block px-4 py-1 bg-card border border-primary/20 rounded-full text-sm font-medium shadow-sm">
-                {battleMessage}
-            </span>
-            )}
-        </motion.div>
-      </AnimatePresence>
+      {/* STATS */}
+      <div className="flex justify-center gap-4 mb-8">
+        <StatCard icon={<DollarSign className="w-4 h-4" />} label="Money" value={`$${stats.money}`} color={stats.money > 0 ? 'text-green-500' : 'text-red-500'} />
+        <StatCard icon={<Brain className="w-4 h-4" />} label="Knowledge" value={`${stats.financeKnowledge}`} color="text-blue-500" />
+        <StatCard icon={<PiggyBank className="w-4 h-4" />} label="Happy" value={`${stats.happiness}`} color="text-yellow-500" />
+      </div>
 
-      {/* --- SECTION 3: STATS HUD --- */}
-      <motion.div 
-        className="flex flex-wrap justify-center gap-3 mb-8"
-        layout
-      >
-        <StatCard 
-          icon={<DollarSign className="w-4 h-4" />} 
-          label="Money" 
-          value={`$${stats.money}`}
-          color={stats.money > 0 ? 'text-green-600' : 'text-red-500'}
-        />
-        <StatCard 
-          icon={<Brain className="w-4 h-4" />} 
-          label="Knowledge" 
-          value={`${stats.financeKnowledge} XP`}
-          color="text-blue-500"
-        />
-        <StatCard 
-          icon={<PiggyBank className="w-4 h-4" />} 
-          label="Happiness" 
-          value={`${stats.happiness}%`}
-          color="text-yellow-500"
-        />
-      </motion.div>
-
-      {/* --- SECTION 4: THE SITUATION CARD (Active Gameplay) --- */}
+      {/* CARD AREA */}
       {!gameOver && activeCard && (
-        <motion.div 
-            key={activeCard.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
-            className="flex-1 flex flex-col items-center max-w-2xl mx-auto w-full"
-        >
-            <div className="w-full bg-card rounded-xl border-2 border-primary/10 shadow-xl overflow-hidden">
-                {/* Situation Text */}
-                <div className="p-8 text-center bg-gradient-to-b from-card to-secondary/30">
-                    <span className="inline-block mb-4 px-3 py-1 bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider rounded-full">
-                        Situation {currentCardIndex + 1} / {cards.length}
-                    </span>
-                    <h2 className="font-display text-2xl md:text-3xl leading-relaxed text-foreground">
-                        {activeCard.situation}
-                    </h2>
-                </div>
+        <div className="flex-1 flex flex-col items-center">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={activeCard.id} // Ensure this matches your ID field (_id or situationId)
+            className="mb-8 text-center max-w-2xl bg-secondary/30 p-6 rounded-2xl border border-border backdrop-blur-sm shadow-sm"
+          >
+            <h2 className="font-display text-xl md:text-2xl leading-relaxed">
+              &quot;{activeCard.scenario}&quot;
+            </h2>
+          </motion.div>
 
-                {/* Choices */}
-                <div className="p-6 grid gap-3 bg-secondary/50">
-                    {activeCard.choices.map((choice, idx) => (
-                        <button
-                            key={idx}
-                            onClick={() => handleChoice(choice)}
-                            className="group relative flex items-center justify-between w-full p-4 bg-background hover:bg-primary text-foreground hover:text-primary-foreground border border-border rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-1 text-left"
-                        >
-                            <span className="font-semibold text-lg">{choice.text}</span>
-                            
-                            {/* Hover Preview of Effect */}
-                            <span className="hidden group-hover:flex items-center gap-2 text-xs opacity-90">
-                                {choice.effect.money !== 0 && (
-                                    <span className={choice.effect.money > 0 ? "text-green-300" : "text-red-200"}>
-                                        {choice.effect.money > 0 ? '+' : ''}${choice.effect.money}
-                                    </span>
-                                )}
-                                <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Select</span>
-                            </span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </motion.div>
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 perspective-1000">
+            <AnimatePresence mode="wait">
+              {activeCard.options.map((choice, idx) => (
+                <GameCard
+                  key={`choice-${idx}`}
+                  choice={choice}
+                  index={idx}
+                  onClick={handleChoice}
+                  disabled={isProcessing}
+                  // ✨ NEW: Pass the clean summary here!
+                  subtitle={getCleanSummary(choice.effect)}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        </div>
       )}
 
-      {/* --- SECTION 5: GAME OVER SCREEN --- */}
+      {/* GAME OVER */}
       <AnimatePresence>
         {gameOver && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="fixed inset-0 bg-background/95 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-background/95 z-50 flex items-center justify-center"
           >
-            <div className="text-center p-8 rounded-2xl bg-card border border-border max-w-md w-full shadow-2xl">
-              <Sparkles className="w-16 h-16 mx-auto mb-4 text-primary animate-pulse" />
-              
-              <h2 className="font-display text-3xl mb-2">Game Complete!</h2>
-              {evilHealth <= 0 && <p className="text-green-500 font-bold mb-4">🏆 Enemy Defeated!</p>}
-              
-              <div className={cn('text-6xl font-display mb-2', getGrade(stats.money).color)}>
-                {getGrade(stats.money + stats.financeKnowledge * 10).grade}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 my-6">
-                <div className="p-3 bg-secondary rounded-lg">
-                    <div className="text-xs text-muted-foreground">Final Money</div>
-                    <div className="font-bold text-xl">${stats.money}</div>
-                </div>
-                <div className="p-3 bg-secondary rounded-lg">
-                    <div className="text-xs text-muted-foreground">Knowledge Gained</div>
-                    <div className="font-bold text-xl text-blue-500">{stats.financeKnowledge} XP</div>
-                </div>
-              </div>
-
-              <button
-                onClick={resetGame}
-                className="w-full inline-flex justify-center items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-all"
-              >
-                <RotateCcw className="w-5 h-5" />
-                Play Again
-              </button>
+            <div className="text-center">
+              <h1 className="text-4xl font-bold mb-4">Game Complete!</h1>
+              <p className="text-xl text-muted-foreground mb-4">Final Score: {stats.money + stats.happiness * 10}</p>
             </div>
           </motion.div>
         )}
@@ -295,15 +248,10 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   );
 };
 
-// Utility Component for Stats
-const StatCard = ({ icon, label, value, color = 'text-foreground' }: { icon: React.ReactNode, label: string, value: string, color?: string }) => (
-  <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-sm min-w-[140px]">
-    <div className={cn('p-2 rounded-lg bg-secondary/50', color)}>
-      {icon}
-    </div>
-    <div>
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">{label}</div>
-      <div className={cn('font-bold text-lg leading-none', color)}>{value}</div>
-    </div>
+// Simple Stat Card Helper
+const StatCard = ({ icon, value, color }: any) => (
+  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border shadow-sm min-w-[100px] justify-center">
+    <div className={cn('p-1.5 rounded-md bg-secondary', color)}>{icon}</div>
+    <div className="font-bold text-sm">{value}</div>
   </div>
 );

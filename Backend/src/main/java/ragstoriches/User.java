@@ -1,8 +1,10 @@
+package ragstoriches;
+
 import org.bson.codecs.pojo.annotations.BsonId;
 
 public class User {
     @BsonId
-    public String id;
+    public String id; // This maps to MongoDB's _id
     public String name;
     public String email;
     public Appearance appearance;
@@ -10,28 +12,34 @@ public class User {
     public double overallScore;
 
     public User() {
-        this.appearance = new Appearance();
-        this.stats = new Stats();
+        // Empty constructor required by MongoDB
+    }
+
+    // Factory method to create a new default user
+    public static User createDefault(String id) {
+        User u = new User();
+        u.id = id;
+        u.name = "Player " + id;
+        u.appearance = new Appearance();
+        u.stats = new Stats();
+        u.calculateScore();
+        return u;
     }
 
     public void calculateScore() {
         if (this.stats != null) {
             this.overallScore = this.stats.money +
-                    this.stats.financeKnowledge +
-                    this.stats.happiness;
+                    (this.stats.financeKnowledge * 10) + // Weighting knowledge
+                    (this.stats.happiness * 5); // Weighting happiness
         }
     }
 
-    // ... getters and setters ...
+    // --- NESTED CLASSES ---
 
-    // ---------------------------------------------------------
-    // FIX: Must be 'public static' so Mongo can create them
-    // ---------------------------------------------------------
     public static class Appearance {
         public String shirtColor = "white";
         public String extraDetail = "none";
 
-        // FIX: Add explicit public empty constructor
         public Appearance() {
         }
     }
@@ -41,7 +49,6 @@ public class User {
         public int financeKnowledge = 0;
         public int happiness = 100;
 
-        // FIX: Add explicit public empty constructor
         public Stats() {
         }
     }

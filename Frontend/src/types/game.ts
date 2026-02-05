@@ -14,10 +14,17 @@ export interface BackendStats {
 }
 
 export interface BackendUser {
-  id: string; // MongoDB _id
+  id: string;
   name: string;
-  avatar: string; // e.g. "white-shirt"
-  stats: BackendStats;
+  appearance: {
+    shirtColor: string;
+    extraDetail: string;
+  };
+  stats: {
+    money: number;
+    happiness: number;
+    financeKnowledge: number;
+  };
   overallScore: number;
 }
 
@@ -33,10 +40,17 @@ export interface Choice {
 }
 
 export interface SituationCard {
-  id: string;
-  situation: string;
-  image?: string;
-  choices: Choice[];
+  _id: string; // MongoDB ID
+  situationId: number;
+  scenario: string;
+  options: {
+    text: string;
+    effect: {
+      money: string;
+      happiness: string;
+      financeKnowledge: string;
+    };
+  }[];
 }
 
 // ==========================================

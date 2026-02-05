@@ -1,3 +1,5 @@
+package ragstoriches.database;
+
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -9,11 +11,17 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class MongoDB {
     private static MongoDatabase database;
 
     // 1. The Init Method (Call this ONCE in Main)
     public static void init(String connectionString) {
+
+        Dotenv dotenv = Dotenv.load();
+        connectionString = dotenv.get("MONGO_URI");
+
         if (database != null)
             return; // Already initialized
 
