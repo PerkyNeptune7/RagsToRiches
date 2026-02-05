@@ -2,12 +2,14 @@ package ragstoriches;
 
 import java.util.List;
 
+import org.bson.BsonType;
 import org.bson.codecs.pojo.annotations.BsonId;
-import org.bson.types.ObjectId;
+import org.bson.codecs.pojo.annotations.BsonRepresentation;
 
 public class Card {
     @BsonId
-    public ObjectId _id;
+    @BsonRepresentation(BsonType.OBJECT_ID)
+    public String _id;
 
     // Matches "situationId": 1
     public int situationId;
