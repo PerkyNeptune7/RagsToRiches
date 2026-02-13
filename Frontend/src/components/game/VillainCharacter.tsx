@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { EvilCharacter } from '@/types/game';
 import { ImpulseDemon } from './ImpulseDemon';

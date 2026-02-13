@@ -149,7 +149,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
   if (!activeCard && !gameOver) return <div className="p-10 text-center">Loading Situations...</div>;
 
   return (
-    <div className="min-h-screen bg-background p-4 flex flex-col max-w-6xl mx-auto overflow-hidden">
+    <div className="min-h-screen bg-background p-4 pb-24 flex flex-col max-w-6xl mx-auto overflow-hidden">
 
       <JourneyTrack
         currentRound={currentCardIndex}
@@ -262,9 +262,19 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
 };
 
 // Simple Stat Card Helper
-const StatCard = ({ icon, value, color }: any) => (
-  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border shadow-sm min-w-[100px] justify-center">
+interface StatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string | number;
+  color: string;
+}
+
+const StatCard = ({ icon, label, value, color }: StatCardProps) => (
+  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card border border-border shadow-sm min-w-[120px] justify-center">
     <div className={cn('p-1.5 rounded-md bg-secondary', color)}>{icon}</div>
-    <div className="font-bold text-sm">{value}</div>
+    <div className="flex flex-col text-left">
+      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="font-bold text-sm">{value}</span>
+    </div>
   </div>
 );

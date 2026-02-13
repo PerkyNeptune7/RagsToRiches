@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import type { ReactNode } from 'react';
 import { Play, BookOpen, Layers, ShoppingBag, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlayerCharacter } from '@/types/game';
@@ -155,10 +156,10 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
 };
 
 interface GameButtonProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick: () => void;
   variant: 'primary' | 'secondary' | 'ghost';
-  icon?: React.ReactNode;
+  icon?: ReactNode;
 }
 
 const GameButton = ({ children, onClick, variant, icon }: GameButtonProps) => (
