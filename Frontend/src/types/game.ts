@@ -3,7 +3,20 @@
 export const API_URL = "http://localhost:8080/api";
 
 // ==========================================
-// 1. NEW BACKEND INTEGRATION TYPES
+// 1. SHOP & ITEM TYPES (NEW)
+// ==========================================
+
+export interface GameItem {
+  id: string;          // "business_suit", "red_cap"
+  name: string;
+  type: 'outfit' | 'hat' | 'glasses' | 'accessory';
+  price: number;
+  knowledgeReq: number; // Min knowledge needed to buy
+  description: string;
+}
+
+// ==========================================
+// 2. BACKEND INTEGRATION TYPES
 // (Matches your Java User & Card Models)
 // ==========================================
 
@@ -13,19 +26,24 @@ export interface BackendStats {
   financeKnowledge: number;
 }
 
-export interface BackendUser {
+export interface PlayerCharacter {
   id: string;
   name: string;
+  
+  // MATCHES JAVA "Appearance" CLASS NESTING
   appearance: {
-    shirtColor: string;
-    extraDetail: string;
+    outfit: string;    // "default", "business_suit"
+    hat: string;       // "none", "red_cap"
+    glasses: string;   // "none", "shades"
+    accessory: string; // "none", "gold_chain"
+    extraDetail?: string; // Optional field from your User.java
   };
-  stats: {
-    money: number;
-    happiness: number;
-    financeKnowledge: number;
-  };
-  overallScore: number;
+
+  // MATCHES JAVA "User" FIELDS
+  inventory: string[]; // List of IDs ["default_outfit", "red_cap"]
+  
+  stats: BackendStats;
+  overallScore?: number;
 }
 
 export interface Effect {
@@ -89,41 +107,20 @@ export interface GameState {
 // 3. CHARACTER SYSTEM (Merged)
 // ==========================================
 
-export type CharacterOutfit = 'default' | 'business' | 'casual' | 'fancy' | 'sporty' | 'student';
-export type CharacterHouse = 'apartment' | 'house' | 'mansion' | 'penthouse' | 'cottage';
-export type CharacterAccessory = 'none' | 'glasses' | 'hat' | 'watch' | 'briefcase' | 'backpack';
-export type CharacterSkinColor = 'light' | 'medium' | 'tan' | 'dark';
-
-export interface CustomizationItem {
-  id: string;
-  name: string;
-  type: 'outfit' | 'house' | 'accessory';
-  value: CharacterOutfit | CharacterHouse | CharacterAccessory;
-  cost: number;
-  icon: string;
-  description: string;
-  unlocked: boolean;
-}
-
-export interface PlayerCharacter {
-  // Visuals (Frontend Only)
-  outfit: CharacterOutfit;
-  house: CharacterHouse;
-  accessory: CharacterAccessory;
-  skinColor: CharacterSkinColor;
-  
-  // Data (Synced with Backend)
-  id?: string;
-  name: string;
-  level: number;       // Can map to financeKnowledge / 10
-  totalPoints: number; // Maps to overallScore
-  stats: BackendStats; // The real numbers from Java
-}
-
 export interface EvilCharacter {
   name: string;
   type: 'debt_monster' | 'impulse_demon' | 'scam_spirit';
   power: number;
   icon: string;
   taunt: string;
+}
+
+// Legacy types (Keep if other components strictly require them, otherwise safe to remove)
+export type CharacterOutfit = string; 
+export type CharacterAccessory = string;
+export interface GameState {
+  stats: BackendStats;
+  round: number;
+  maxRounds: number;
+  currentSituation: SituationCard | null;
 }
