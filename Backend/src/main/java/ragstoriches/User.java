@@ -1,5 +1,8 @@
 package ragstoriches;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bson.codecs.pojo.annotations.BsonId;
 
 public class User {
@@ -11,6 +14,9 @@ public class User {
     public Stats stats;
     public double overallScore;
 
+    // NEW: List of Item IDs the user owns (e.g., ["default_outfit", "gold_chain"])
+    public List<String> inventory;
+
     public User() {
         // Empty constructor required by MongoDB
     }
@@ -21,8 +27,13 @@ public class User {
         u.id = id;
         u.name = "Player " + id;
         u.appearance = new Appearance();
+        u.inventory = new ArrayList<>();
         u.stats = new Stats();
         u.calculateScore();
+        u.inventory.add("default_outfit");
+        u.inventory.add("none_hat");
+        u.inventory.add("none_glasses");
+        u.inventory.add("none_accessory");
         return u;
     }
 
@@ -37,8 +48,11 @@ public class User {
     // --- NESTED CLASSES ---
 
     public static class Appearance {
-        public String shirtColor = "white";
-        public String extraDetail = "none";
+        // Updated to match Frontend Component slots
+        public String outfit = "default"; // default, business, suit
+        public String hat = "none"; // none, cap, grad_cap
+        public String glasses = "none"; // none, shades, reading
+        public String accessory = "none"; // none, gold_chain, watch
 
         public Appearance() {
         }

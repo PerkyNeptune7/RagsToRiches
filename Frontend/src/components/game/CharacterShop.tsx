@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlayerCharacter, GameItem, API_URL } from '@/types/game';
 import { PlayerCharacterComponent } from './PlayerCharacter';

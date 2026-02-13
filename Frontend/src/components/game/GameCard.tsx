@@ -3,7 +3,6 @@ import { Choice } from '@/types/game';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { parseCash, parseSymbol } from '@/utils/gameLogic'; // Import your helpers
-import React from 'react';
 
 interface GameCardProps {
   choice: Choice;

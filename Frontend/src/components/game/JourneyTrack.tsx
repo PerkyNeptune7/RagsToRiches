@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { PlayerCharacter } from '@/types/game';
 import { Flag } from 'lucide-react';

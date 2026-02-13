@@ -66,10 +66,38 @@ public class Main {
                                 request.choiceIndex);
                         ctx.json(updatedUser);
                     });
+
+                    ApiBuilder.get("shop/catalog", ctx -> {
+                        ctx.json(GameApi.ITEM_CATALOG);
+                    });
+
+                    // 7. SHOP: BUY ITEM
+                    ApiBuilder.post("shop/buy", ctx -> {
+                        ShopRequest req = ctx.bodyAsClass(ShopRequest.class);
+                        try {
+                            User u = game.buyItem(req.userId, req.itemId);
+                            ctx.json(u);
+                        } catch (RuntimeException e) {
+                            ctx.status(400).result(e.getMessage());
+                        }
+                    });
+
+                    // 8. SHOP: EQUIP ITEM
+                    ApiBuilder.post("shop/equip", ctx -> {
+                        ShopRequest req = ctx.bodyAsClass(ShopRequest.class);
+                        try {
+                            User u = game.equipItem(req.userId, req.itemId);
+                            ctx.json(u);
+                        } catch (RuntimeException e) {
+                            ctx.status(400).result(e.getMessage());
+                        }
+                    });
                 });
             });
 
         }).start(8080); // Start the server
+
+        Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
 
         System.out.println("🚀 Backend is LISTENING on http://localhost:8080/api/");
     }
@@ -81,6 +109,14 @@ public class Main {
         public int choiceIndex;
 
         public ChoiceRequest() {
+        }
+    }
+
+    public static class ShopRequest {
+        public String userId;
+        public String itemId;
+
+        public ShopRequest() {
         }
     }
 }
