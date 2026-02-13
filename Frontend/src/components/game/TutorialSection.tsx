@@ -58,21 +58,22 @@ const budgetRules = [
 
 export const TutorialSection = () => {
   return (
-    <div className="min-h-screen bg-background p-6 pb-20">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="text-center mb-12"
-      >
-        <h2 className="font-display text-3xl mb-3 text-gradient-gold">Learn Budgeting</h2>
-        <p className="text-muted-foreground max-w-lg mx-auto">
-          Master these core concepts to become financially literate and win the game!
-        </p>
-      </motion.div>
+    <div className="min-h-screen bg-background/80 p-6 pb-24">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h2 className="font-display text-3xl mb-3 text-gradient-gold">Learn Budgeting</h2>
+          <p className="text-muted-foreground max-w-lg mx-auto">
+            Master these core concepts to become financially literate and win the game!
+          </p>
+        </motion.div>
 
       {/* Concept Cards */}
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto mb-16">
+      <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-16">
         {concepts.map((concept, index) => (
           <motion.div
             key={concept.title}
@@ -111,7 +112,7 @@ export const TutorialSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="max-w-2xl mx-auto"
+        className="max-w-3xl mx-auto"
       >
         <div className="flex items-center justify-center gap-3 mb-6">
           <Target className="w-6 h-6 text-primary" />
@@ -139,7 +140,7 @@ export const TutorialSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
-        className="max-w-2xl mx-auto mt-12"
+        className="max-w-3xl mx-auto mt-12"
       >
         <div className="p-6 rounded-2xl bg-gradient-to-r from-primary/10 to-investment/10 border border-primary/20">
           <div className="flex items-center gap-3 mb-4">
@@ -154,6 +155,7 @@ export const TutorialSection = () => {
           </p>
         </div>
       </motion.div>
+      </div>
     </div>
   );
 };

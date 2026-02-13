@@ -1,7 +1,8 @@
 import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PlayerCharacter, CustomizationItem } from '@/types/game';
-import { customizationItems, getItemsByType } from '@/data/customization';
+import { getItemsByType } from '@/data/customization';
 import { PlayerCharacterComponent } from './PlayerCharacter';
 import { cn } from '@/lib/utils';
 import { 
@@ -35,7 +36,7 @@ export const CharacterShop = ({
   const [activeTab, setActiveTab] = useState<TabType>('outfit');
   const [previewCharacter, setPreviewCharacter] = useState<PlayerCharacter>(character);
 
-  const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
+  const tabs: { id: TabType; label: string; icon: ReactNode }[] = [
     { id: 'outfit', label: 'Outfits', icon: <Shirt className="w-4 h-4" /> },
     { id: 'house', label: 'Homes', icon: <Home className="w-4 h-4" /> },
     { id: 'accessory', label: 'Accessories', icon: <Sparkles className="w-4 h-4" /> },

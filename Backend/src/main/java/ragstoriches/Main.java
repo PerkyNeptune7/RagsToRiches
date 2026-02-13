@@ -97,6 +97,8 @@ public class Main {
 
         }).start(8080); // Start the server
 
+        Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
+
         System.out.println("🚀 Backend is LISTENING on http://localhost:8080/api/");
     }
 

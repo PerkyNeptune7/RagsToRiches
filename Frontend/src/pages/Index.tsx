@@ -9,7 +9,7 @@ import { CharacterShop } from '@/components/game/CharacterShop';
 import { PlayerCharacter, CustomizationItem, BackendUser, SituationCard } from '@/types/game';
 import { api } from "@/hooks/Api"; // Ensure this matches where you created api.ts
 import { toast } from "sonner";
-import React from 'react';
+import { AuthPanel, AuthState } from '@/components/auth/AuthPanel';
 type Page = 'home' | 'play' | 'learn' | 'cards' | 'shop';
 
 // Default visuals (Backend doesn't store clothes yet, so we keep this local)
@@ -20,6 +20,8 @@ const defaultVisuals = {
   skinColor: 'medium',
   unlockedItems: ['outfit-default', 'house-apartment', 'accessory-none'],
 } as const;
+
+const AUTH_STORAGE_KEY = 'budgetquest-auth';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -45,12 +47,34 @@ const Index = () => {
     };
   });
 
+  const [auth, setAuth] = useState<AuthState>({
+    status: 'guest',
+    userName: 'Guest',
+    email: '',
+  });
+
   // -------------------------------------------
   // 2. LOAD GAME (Sync with Java Backend)
   // -------------------------------------------
   useEffect(() => {
     const loadBackendData = async () => {
       try {
+        // TODO: Replace with real session check from backend.
+        const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (savedAuth) {
+          try {
+            const parsedAuth = JSON.parse(savedAuth) as AuthState;
+            setAuth(parsedAuth);
+            setPlayerCharacter(prev => ({
+              ...prev,
+              name: parsedAuth.userName || prev.name,
+            }));
+          } catch (error) {
+            console.warn("Invalid auth cache, clearing.", error);
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+          }
+        }
+
         const userId = "test-student-001"; // Hardcoded for prototype
 
         // FETCH BOTH USER AND CARDS
@@ -101,6 +125,10 @@ const Index = () => {
     };
     localStorage.setItem('budgetquest-character', JSON.stringify(visualData));
   }, [playerCharacter]);
+
+  useEffect(() => {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+  }, [auth]);
 
   const handleNavigate = (page: Page | 'play' | 'learn' | 'cards' | 'shop') => {
     setCurrentPage(page as Page);
@@ -169,10 +197,70 @@ const Index = () => {
     }));
   };
 
+  const handleLogin = (payload: { email: string; password: string }) => {
+    if (!payload.email || !payload.password) {
+      toast.error("Please enter your email and password.");
+      return false;
+    }
+    // TODO: Call backend login endpoint and return authenticated user profile.
+    const displayName = payload.email.split('@')[0] || 'Player';
+    setAuth({
+      status: 'authenticated',
+      userName: displayName,
+      email: payload.email,
+    });
+    setPlayerCharacter(prev => ({
+      ...prev,
+      name: displayName,
+    }));
+    toast.success(`Welcome back, ${displayName}!`);
+    return true;
+  };
+
+  const handleSignup = (payload: { name: string; email: string; password: string }) => {
+    if (!payload.name || !payload.email || !payload.password) {
+      toast.error("Please fill out all fields.");
+      return false;
+    }
+    // TODO: Call backend signup endpoint and return authenticated user profile.
+    setAuth({
+      status: 'authenticated',
+      userName: payload.name,
+      email: payload.email,
+    });
+    setPlayerCharacter(prev => ({
+      ...prev,
+      name: payload.name,
+    }));
+    toast.success(`Account created. Welcome, ${payload.name}!`);
+    return true;
+  };
+
+  const handleLogout = () => {
+    // TODO: Call backend logout endpoint and clear server session.
+    setAuth({
+      status: 'guest',
+      userName: 'Guest',
+      email: '',
+    });
+    setPlayerCharacter(prev => ({
+      ...prev,
+      name: 'Guest',
+    }));
+    toast.message("You're now playing as a guest.");
+  };
+
   if (loading) return <div className="flex h-screen items-center justify-center">Loading Data...</div>;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(250,204,21,0.08),transparent_55%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_50%)]" />
+      </div>
+
+      <AuthPanel auth={auth} onLogin={handleLogin} onSignup={handleSignup} onLogout={handleLogout} />
+
       <AnimatePresence mode="wait">
         <motion.div
           key={currentPage}
@@ -180,6 +268,7 @@ const Index = () => {
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -20 }}
           transition={{ duration: 0.3 }}
+          className="relative z-10 pb-28"
         >
           {currentPage === 'home' && (
             <>
@@ -196,7 +285,7 @@ const Index = () => {
 
                   <div className="mt-4 rounded bg-white p-4 shadow-sm border border-yellow-200">
                     <p className="font-semibold text-gray-800">Situation #1 Preview:</p>
-                    <p className="text-lg italic text-gray-600">"{cards[0].scenario}"</p>
+                    <p className="text-lg italic text-gray-600">&quot;{cards[0].scenario}&quot;</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {cards[0].options.map((c, i) => (
                         <span key={i} className="rounded bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">

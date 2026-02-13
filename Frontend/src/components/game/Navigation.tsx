@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Home, Gamepad2, BookOpen, Layers, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import React from 'react';
 type Page = 'home' | 'play' | 'learn' | 'cards' | 'shop';
 
 interface NavigationProps {
@@ -23,9 +22,9 @@ export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ delay: 0.5 }}
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40"
+      className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4"
     >
-      <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-2xl bg-card/80 backdrop-blur-lg border border-border shadow-2xl">
+      <div className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-3 rounded-2xl bg-card/80 backdrop-blur-lg border border-border shadow-2xl w-fit max-w-[96vw]">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentPage === item.id;
