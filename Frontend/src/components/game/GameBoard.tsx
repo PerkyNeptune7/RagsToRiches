@@ -4,7 +4,7 @@ import { GameCard } from './GameCard';
 import { PlayerCharacterComponent } from './PlayerCharacter';
 import { VillainCharacter, VillainState } from './VillainCharacter';
 import { JourneyTrack } from './JourneyTrack';
-import { getCleanSummary, calculateTurnScore, parseCash, parseSymbol } from '@/utils/gameLogic'; // Import helpers
+import { api } from "@/hooks/Api"; // Import API
 
 import {
   PlayerCharacter,
@@ -21,6 +21,7 @@ import {
   Swords,
   Brain
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface GameBoardProps {
   playerCharacter: PlayerCharacter;
@@ -30,7 +31,11 @@ interface GameBoardProps {
 
 export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps) => {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
+  // Track Stats & Score locally to compare with Backend updates
   const [stats, setStats] = useState<BackendStats>(playerCharacter.stats);
+  const [currentScore, setCurrentScore] = useState<number>(playerCharacter.overallScore || 0);
+
   const [gameOver, setGameOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -59,94 +64,97 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
 
   const activeCard = cards[currentCardIndex];
 
-  const handleChoice = (choice: Choice) => {
+  // =========================================================
+  //  THE NEW BACKEND-POWERED HANDLER
+  // =========================================================
+  const handleChoice = async (choice: Choice, choiceIndex: number) => {
     if (gameOver || isProcessing) return;
     setIsProcessing(true);
+    setPlayerReaction('thinking');
 
-    // 1. Calculate Score using the Helper Formula
-    const turnScore = calculateTurnScore(choice.effect);
+    try {
+      // 1. CALL BACKEND (Let Java decide the outcome)
+      // activeCard.situationId is crucial so backend knows which card we are on
+      const updatedUser = await api.makeChoice(playerCharacter.id, activeCard.situationId, choiceIndex);
 
-    // 2. Parse Stats (Strings -> Numbers)
-    const moneyChange = parseCash(choice.effect.money);
-    const hapChange = parseSymbol(choice.effect.happiness);
-    const knwChange = parseSymbol(choice.effect.financeKnowledge);
-
-    // 3. Update Stats
-    const newStats = {
-      money: stats.money + moneyChange,
-      happiness: stats.happiness + hapChange,
-      financeKnowledge: stats.financeKnowledge + knwChange,
-    };
-    setStats(newStats);
-
-    const playSoundEffect = (type: 'hero' | 'villain') => {
-      // Use the path relative to the public folder
-      const path = type === 'hero' ? '/sounds/hero.mp3' : '/sounds/villain.mp3';
-      const audio = new Audio(path);
-
-      audio.volume = 0.5; // Set volume (0.0 to 1.0)
-
-      // Play and catch errors (e.g., if user hasn't interacted with page yet)
-      audio.play().catch((err) => console.warn("Audio play failed:", err));
-    };
-
-    // 4. === ANIMATION LOGIC (Based on Score) ===
-
-    // Threshold: Score > 0 is GOOD (Hero Dance), Score <= 0 is BAD (Villain Dance)
-    const isGoodTurn = turnScore > 0;
-
-    if (!isGoodTurn) {
-      // --- VILLAIN DANCE ---
-      setIsEvilAttacking(true);
-      playSoundEffect('villain');
-      setPlayerReaction('sad');
-      setBattleMessage(`😈 ${evilCharacter?.name} laughs at your mistake!`);
-
-      setTimeout(() => {
-        setIsEvilAttacking(false);
-        setPlayerReaction('neutral');
-      }, 2500);
-
-    } else {
-      // --- HERO DANCE ---
-      setIsEvilAttacking(false);
-      playSoundEffect('hero');
-      setPlayerReaction('happy'); // Triggers Zoom/Dance
-
-      // Visual Damage to Villain
-      const damage = Math.min(turnScore * 5, 20); // Scale score to damage
-      setDamageDealt(damage);
-      setEvilHealth(prev => Math.max(0, prev - damage));
-
-      setBattleMessage("🎉 Great Choice! You're winning!");
-
-      setTimeout(() => {
-        setPlayerReaction('neutral');
-        setDamageDealt(undefined);
-      }, 2500);
-    }
-
-    // 5. Next Card
-    setTimeout(() => {
-      setDamageDealt(undefined);
-      setBattleMessage('');
-      setIsProcessing(false);
-
-      if (currentCardIndex + 1 < cards.length) {
-        setCurrentCardIndex(prev => prev + 1);
-      } else {
-        finishGame(newStats);
+      if (!updatedUser) {
+        throw new Error("Failed to process turn");
       }
-    }, 2500);
+
+      // 2. CALCULATE DELTA (Did we win or lose points?)
+      // The backend has already run your formula and updated 'overallScore'
+      const newScore = updatedUser.overallScore;
+      const scoreDelta = newScore - currentScore;
+      const isGoodTurn = scoreDelta > 0;
+
+      // 3. UPDATE LOCAL STATE
+      setStats(updatedUser.stats);
+      setCurrentScore(newScore);
+
+      // 4. ANIMATION LOGIC (Based on Backend Result)
+      const playSoundEffect = (type: 'hero' | 'villain') => {
+        const audio = new Audio(type === 'hero' ? '/sounds/hero.mp3' : '/sounds/villain.mp3');
+        audio.volume = 0.5;
+        audio.play().catch(() => { });
+      };
+
+      if (!isGoodTurn) {
+        // --- VILLAIN DANCE (Bad Choice) ---
+        setIsEvilAttacking(true);
+        playSoundEffect('villain');
+        setPlayerReaction('sad');
+        setBattleMessage(`😈 ${evilCharacter?.name} laughs at your mistake!`);
+
+        setTimeout(() => {
+          setIsEvilAttacking(false);
+          setPlayerReaction('neutral');
+        }, 2500);
+
+      } else {
+        // --- HERO DANCE (Good Choice) ---
+        setIsEvilAttacking(false);
+        playSoundEffect('hero');
+        setPlayerReaction('happy');
+
+        // Visual Damage to Villain based on score gained
+        const damage = Math.min(scoreDelta * 2, 30);
+        setDamageDealt(damage);
+        setEvilHealth(prev => Math.max(0, prev - damage));
+
+        setBattleMessage("🎉 Smart Move! Score Up!");
+
+        setTimeout(() => {
+          setPlayerReaction('neutral');
+          setDamageDealt(undefined);
+        }, 2500);
+      }
+
+      // 5. NEXT CARD
+      setTimeout(() => {
+        setDamageDealt(undefined);
+        setBattleMessage('');
+        setIsProcessing(false);
+
+        if (currentCardIndex + 1 < cards.length) {
+          setCurrentCardIndex(prev => prev + 1);
+        } else {
+          finishGame(newScore);
+        }
+      }, 2500);
+
+    } catch (error) {
+      console.error("Turn failed", error);
+      toast.error("Server Error: Could not process choice");
+      setIsProcessing(false);
+    }
   };
 
-  const finishGame = (finalStats: typeof stats) => {
+  const finishGame = (finalScore: number) => {
     setGameOver(true);
-    const finalScore = finalStats.money + (finalStats.happiness * 10) + (finalStats.financeKnowledge * 20);
     setTimeout(() => onGameEnd(finalScore), 2500);
   };
 
-  if (!activeCard && !gameOver) return <div className="p-10 text-center">Loading Situations...</div>;
+  if (!activeCard && !gameOver) return <div className="p-10 text-center text-white">Loading Situations...</div>;
 
   return (
     <div className="min-h-screen bg-background p-4 pb-24 flex flex-col max-w-6xl mx-auto overflow-hidden">
@@ -216,7 +224,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            key={String(activeCard.id)} // Ensure this matches your ID field (_id or situationId)
+            key={String(activeCard.situationId)}
             className="mb-8 text-center max-w-2xl bg-secondary/30 p-6 rounded-2xl border border-border backdrop-blur-sm shadow-sm"
           >
             <h2 className="font-display text-xl md:text-2xl leading-relaxed">
@@ -231,10 +239,9 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
                   key={`choice-${idx}`}
                   choice={choice}
                   index={idx}
-                  onClick={handleChoice}
+                  // Pass index so API knows which option was picked
+                  onClick={(c) => handleChoice(c, idx)}
                   disabled={isProcessing}
-                  // ✨ NEW: Pass the clean summary here!
-                  subtitle={getCleanSummary(choice.effect)}
                 />
               ))}
             </AnimatePresence>
@@ -252,7 +259,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
           >
             <div className="text-center">
               <h1 className="text-4xl font-bold mb-4">Game Complete!</h1>
-              <p className="text-xl text-muted-foreground mb-4">Final Score: {stats.money + stats.happiness * 10}</p>
+              <p className="text-xl text-muted-foreground mb-4">Final Score: {currentScore}</p>
             </div>
           </motion.div>
         )}
