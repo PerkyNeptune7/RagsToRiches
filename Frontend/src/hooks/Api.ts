@@ -1,7 +1,8 @@
-import { 
-  API_URL, 
-  BackendUser, 
-  SituationCard 
+import {
+  API_URL,
+  BackendUser,
+  SituationCard, 
+  GameItem
 } from "@/types/game";
 
 export const api = {
@@ -28,7 +29,7 @@ export const api = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(user),
       });
-      
+
       if (!response.ok) throw new Error("Save failed");
       return await response.json();
     } catch (error) {
@@ -61,26 +62,67 @@ export const api = {
     }
   },
 
-  
+
   makeChoice: async (userId: string, situationId: number, choiceIndex: number): Promise<BackendUser | null> => {
     try {
       const response = await fetch(`${API_URL}/choose`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // ⚠️ CRITICAL: Must match Java 'ChoiceRequest' class fields!
-        body: JSON.stringify({ 
-          userId: userId, 
-          situationId: situationId, 
-          choiceIndex: choiceIndex 
+        body: JSON.stringify({
+          userId: userId,
+          situationId: situationId,
+          choiceIndex: choiceIndex
         }),
       });
 
       if (!response.ok) throw new Error("Choice processing failed");
-      
+
       // Returns the UPDATED User object (with new money/happiness)
       return await response.json();
     } catch (error) {
       console.error("❌ API Error:", error);
+      return null;
+    }
+  },
+
+  getShopCatalog: async (): Promise<GameItem[]> => {
+    try {
+      const response = await fetch(`${API_URL}/shop/catalog`);
+      if (!response.ok) throw new Error("Failed to fetch catalog");
+      return await response.json();
+    } catch (error) {
+      console.error("❌ API Error: Shop catalog failed", error);
+      return [];
+    }
+  },
+
+  buyItem: async (userId: string, itemId: string): Promise<BackendUser | null> => {
+    const response = await fetch(`${API_URL}/shop/buy`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, itemId }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText); // Throw backend error (e.g., "Not enough money")
+    }
+    return await response.json();
+  },
+
+  equipItem: async (userId: string, itemId: string): Promise<BackendUser | null> => {
+    try {
+      const response = await fetch(`${API_URL}/shop/equip`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, itemId }),
+      });
+
+      if (!response.ok) throw new Error("Equip failed");
+      return await response.json();
+    } catch (error) {
+      console.error("❌ API Error: Equip failed", error);
       return null;
     }
   }

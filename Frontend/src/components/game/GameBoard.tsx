@@ -216,7 +216,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd }: GameBoardProps)
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            key={activeCard.id} // Ensure this matches your ID field (_id or situationId)
+            key={String(activeCard.id)} // Ensure this matches your ID field (_id or situationId)
             className="mb-8 text-center max-w-2xl bg-secondary/30 p-6 rounded-2xl border border-border backdrop-blur-sm shadow-sm"
           >
             <h2 className="font-display text-xl md:text-2xl leading-relaxed">

@@ -141,19 +141,6 @@ export const GameCard = ({ choice, onClick, disabled, subtitle, index = 0 }: Gam
             <h3 className="font-display text-sm leading-snug font-bold text-foreground break-words line-clamp-3">
               {choice.text}
             </h3>
-
-            {/* 2. FIX: Display the subtitle (Clean Summary) clearly */}
-            {subtitle ? (
-              <span className={cn(
-                "text-xs font-bold px-2 py-1.5 rounded bg-background/80 backdrop-blur-sm border border-border shadow-sm",
-                styles.text // Colors the text based on category (Green for income, Red for expense)
-              )}>
-                {subtitle}
-              </span>
-            ) : (
-              // Fallback skeleton if subtitle is missing
-              <div className="h-6 w-full bg-white/10 rounded animate-pulse" />
-            )}
           </div>
         </div>
       </motion.button>

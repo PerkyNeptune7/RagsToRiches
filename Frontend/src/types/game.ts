@@ -1,9 +1,11 @@
 // src/types/game.ts
 
+import { Key } from "readline";
+
 export const API_URL = "http://localhost:8080/api";
 
 // ==========================================
-// 1. SHOP & ITEM TYPES (NEW)
+// 1. SHOP & ITEM TYPES
 // ==========================================
 
 export interface GameItem {
@@ -26,25 +28,26 @@ export interface BackendStats {
   financeKnowledge: number;
 }
 
-export interface PlayerCharacter {
+// NEW: Matches your Java "User.java" class exactly
+export interface BackendUser {
   id: string;
   name: string;
-  
-  // MATCHES JAVA "Appearance" CLASS NESTING
+  email?: string; // Optional, present in Java User class
   appearance: {
     outfit: string;    // "default", "business_suit"
     hat: string;       // "none", "red_cap"
     glasses: string;   // "none", "shades"
     accessory: string; // "none", "gold_chain"
-    extraDetail?: string; // Optional field from your User.java
+    extraDetail?: string;
   };
-
-  // MATCHES JAVA "User" FIELDS
-  inventory: string[]; // List of IDs ["default_outfit", "red_cap"]
-  
+  inventory: string[]; // ["default_outfit", "gold_chain"]
   stats: BackendStats;
-  overallScore?: number;
+  overallScore: number;
 }
+
+// PlayerCharacter is the Frontend representation of BackendUser
+// We can extend it or make it compatible
+export type PlayerCharacter = BackendUser
 
 export interface Effect {
   money: number;
@@ -58,26 +61,26 @@ export interface Choice {
 }
 
 export interface SituationCard {
+  id: Key;
   _id: string; // MongoDB ID
   situationId: number;
   scenario: string;
   options: {
     text: string;
     effect: {
-      money: string;
-      happiness: string;
-      financeKnowledge: string;
+      money: number; // Changed to number for calculation math
+      happiness: number;
+      financeKnowledge: number;
     };
   }[];
 }
 
 // ==========================================
-// 2. EXISTING UI TYPES (Preserved)
+// 3. LEGACY / UI TYPES
 // ==========================================
 
 export type CardCategory = 'income' | 'expense' | 'savings' | 'investment';
 
-// Kept for backward compatibility if your UI uses it
 export interface BudgetCard {
   id: string;
   name: string;
@@ -90,21 +93,16 @@ export interface BudgetCard {
 }
 
 export interface GameState {
-  // New Stats (Synced with Backend)
-  stats: BackendStats; 
-  
-  // Legacy UI State (Keep these for animations/rounds)
+  stats: BackendStats;
   round: number;
   maxRounds: number;
   currentSituation: SituationCard | null; // The active card from DB
-  
-  // Optional: Keep these if your UI calculates monthly flows locally
-  monthlyIncome: number;
-  monthlyExpenses: number;
+  monthlyIncome?: number;
+  monthlyExpenses?: number;
 }
 
 // ==========================================
-// 3. CHARACTER SYSTEM (Merged)
+// 4. CHARACTER SYSTEM EXTRAS
 // ==========================================
 
 export interface EvilCharacter {
@@ -115,12 +113,19 @@ export interface EvilCharacter {
   taunt: string;
 }
 
-// Legacy types (Keep if other components strictly require them, otherwise safe to remove)
+// Helper types for UI components
 export type CharacterOutfit = string; 
 export type CharacterAccessory = string;
-export interface GameState {
-  stats: BackendStats;
-  round: number;
-  maxRounds: number;
-  currentSituation: SituationCard | null;
+
+// CustomizationItem (For the Shop UI internal logic if needed, 
+// though we mostly use GameItem now)
+export interface CustomizationItem {
+  id: string;
+  name: string;
+  type: 'outfit' | 'house' | 'accessory'; // 'house' is legacy
+  value: string;
+  cost: number;
+  icon: string;
+  description: string;
+  unlocked: boolean;
 }

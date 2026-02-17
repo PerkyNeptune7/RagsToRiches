@@ -1,54 +1,30 @@
 import { motion } from 'framer-motion';
 import type { ReactNode } from 'react';
-import { Play, BookOpen, Layers, ShoppingBag, Coins } from 'lucide-react';
+import { Play, BookOpen, Layers, ShoppingBag, Coins, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PlayerCharacter } from '@/types/game';
 import { PlayerCharacterComponent } from './PlayerCharacter';
 
 interface HeroSectionProps {
-  onNavigate: (page: 'play' | 'learn' | 'cards' | 'shop') => void;
+  onNavigate: (page: 'play' | 'learn' | 'shop' | 'leaderboard') => void;
   playerCharacter: PlayerCharacter;
 }
 
 export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) => {
+  // CRITICAL FIX: Safety check to prevent "undefined" crashes
+  if (!playerCharacter) return null;
+
+  // CRITICAL FIX: Use overallScore (Backend name) instead of totalPoints (Frontend name)
+  // We use || 0 to ensure it never crashes even if score is missing
+  const score = Math.round(playerCharacter.overallScore || 0);
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-savings/5 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-investment/5 rounded-full blur-3xl" />
       </div>
-
-      {/* Floating cards decoration */}
-      <motion.div
-        animate={{ y: [0, -20, 0], rotate: [-5, 5, -5] }}
-        transition={{ duration: 6, repeat: Infinity }}
-        className="absolute top-20 left-[10%] text-6xl opacity-20"
-      >
-        💰
-      </motion.div>
-      <motion.div
-        animate={{ y: [0, 20, 0], rotate: [5, -5, 5] }}
-        transition={{ duration: 5, repeat: Infinity, delay: 1 }}
-        className="absolute top-40 right-[15%] text-5xl opacity-20"
-      >
-        📊
-      </motion.div>
-      <motion.div
-        animate={{ y: [0, -15, 0], rotate: [-3, 3, -3] }}
-        transition={{ duration: 7, repeat: Infinity, delay: 2 }}
-        className="absolute bottom-40 left-[20%] text-5xl opacity-20"
-      >
-        🏦
-      </motion.div>
-      <motion.div
-        animate={{ y: [0, 15, 0], rotate: [3, -3, 3] }}
-        transition={{ duration: 5.5, repeat: Infinity, delay: 0.5 }}
-        className="absolute bottom-32 right-[10%] text-6xl opacity-20"
-      >
-        💳
-      </motion.div>
 
       {/* Player Character & Stats */}
       <motion.div
@@ -72,7 +48,9 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
             className="mt-4 flex items-center gap-2 bg-primary/20 hover:bg-primary/30 px-4 py-2 rounded-full border border-primary/30 transition-colors"
           >
             <Coins className="w-4 h-4 text-primary" />
-            <span className="text-primary font-semibold">{playerCharacter.totalPoints.toLocaleString()} pts</span>
+            <span className="text-primary font-semibold">
+              {score.toLocaleString()} pts
+            </span>
             <ShoppingBag className="w-4 h-4 text-muted-foreground" />
           </motion.button>
         </div>
@@ -85,22 +63,12 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
         transition={{ duration: 0.8 }}
         className="relative text-center z-10"
       >
-        {/* Logo/Title */}
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
-          <h1 className="font-display text-5xl md:text-7xl mb-4 text-gradient-gold">
-            Cash Quest
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-2">
-            Master Your Money
-          </p>
-          <p className="text-sm text-muted-foreground/70 max-w-md mx-auto mb-12">
-            A card game that teaches financial literacy through strategic decision-making
-          </p>
-        </motion.div>
+        <h1 className="font-display text-5xl md:text-7xl mb-4 text-gradient-gold">
+          Rags to Riches
+        </h1>
+        <p className="text-xl md:text-2xl text-muted-foreground mb-12">
+          Master Your Money Management Skills
+        </p>
 
         {/* Action Buttons */}
         <motion.div
@@ -109,47 +77,18 @@ export const HeroSection = ({ onNavigate, playerCharacter }: HeroSectionProps) =
           transition={{ delay: 0.4 }}
           className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap"
         >
-          <GameButton
-            onClick={() => onNavigate('play')}
-            variant="primary"
-            icon={<Play className="w-5 h-5" />}
-          >
+          <GameButton onClick={() => onNavigate('play')} variant="primary" icon={<Play className="w-5 h-5" />}>
             Start Game
           </GameButton>
-          <GameButton
-            onClick={() => onNavigate('shop')}
-            variant="secondary"
-            icon={<ShoppingBag className="w-5 h-5" />}
-          >
+
+          <GameButton onClick={() => onNavigate('shop')} variant="secondary" icon={<ShoppingBag className="w-5 h-5" />}>
             Customize
           </GameButton>
-          <GameButton
-            onClick={() => onNavigate('learn')}
-            variant="ghost"
-            icon={<BookOpen className="w-5 h-5" />}
-          >
-            Learn
-          </GameButton>
-          <GameButton
-            onClick={() => onNavigate('cards')}
-            variant="ghost"
-            icon={<Layers className="w-5 h-5" />}
-          >
-            Cards
+
+          <GameButton onClick={() => onNavigate('leaderboard')} variant="secondary" icon={<Trophy className="w-5 h-5 text-yellow-500" />}>
+            Rankings
           </GameButton>
         </motion.div>
-      </motion.div>
-
-      {/* Bottom decoration */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.8 }}
-        className="absolute bottom-20 text-center"
-      >
-        <p className="text-xs text-muted-foreground/50">
-          💡 Defeat the Debt Monster by making smart financial choices!
-        </p>
       </motion.div>
     </div>
   );
@@ -169,22 +108,9 @@ const GameButton = ({ children, onClick, variant, icon }: GameButtonProps) => (
     onClick={onClick}
     className={cn(
       'inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-base transition-all',
-      variant === 'primary' && [
-        'bg-gradient-to-r from-primary via-primary to-investment',
-        'text-primary-foreground',
-        'shadow-lg shadow-primary/30',
-        'hover:shadow-xl hover:shadow-primary/40',
-      ],
-      variant === 'secondary' && [
-        'bg-secondary border-2 border-primary/30',
-        'text-foreground',
-        'hover:border-primary/50 hover:bg-secondary/80',
-      ],
-      variant === 'ghost' && [
-        'bg-transparent border border-border',
-        'text-muted-foreground',
-        'hover:text-foreground hover:border-foreground/30',
-      ]
+      variant === 'primary' && 'bg-blue-600 text-white shadow-lg hover:bg-blue-500',
+      variant === 'secondary' && 'bg-slate-800 border-2 border-slate-700 text-white hover:bg-slate-700',
+      variant === 'ghost' && 'bg-transparent text-slate-400 hover:text-white'
     )}
   >
     {icon}
