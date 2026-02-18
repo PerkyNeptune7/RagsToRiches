@@ -125,7 +125,6 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
       <Navigation currentPage={currentPage} onNavigate={(p) => setCurrentPage(p as Page)} />
     </div>
   );
