@@ -30,6 +30,8 @@ export interface BackendStats {
 
 // NEW: Matches your Java "User.java" class exactly
 export interface BackendUser {
+  outfit: string;
+  accessory: string;
   id: string;
   name: string;
   email?: string; // Optional, present in Java User class
