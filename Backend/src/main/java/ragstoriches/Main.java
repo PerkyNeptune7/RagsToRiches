@@ -1,19 +1,14 @@
-package ragstoriches;
-
-import io.github.cdimascio.dotenv.Dotenv;
-import io.javalin.Javalin;
-import ragstoriches.Api.AuthApi;
-import ragstoriches.Api.GameApi;
-import ragstoriches.database.MongoDB;
-import ragstoriches.logic.RagsToRichesCalculator;
-
 public class Main {
     public static void main(String[] args) {
         // 1. Config & Environment
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         String mongoUri = getEnv(dotenv, "MONGO_URI");
         String jwtSecret = getEnv(dotenv, "JWT_SECRET");
-        String geminiKey = getEnv(dotenv, "GEMINI_API_KEY"); // You'll need this for the bot!
+        String geminiKey = getEnv(dotenv, "GEMINI_API_KEY");
+
+        // RENDER FIX: Read the "PORT" environment variable assigned by Render
+        // Default to 7070 for your local development
+        int port = Integer.parseInt(getEnv(dotenv, "PORT") != null ? getEnv(dotenv, "PORT") : "7070");
 
         if (mongoUri == null) {
             System.err.println("❌ ERROR: MONGO_URI is not set!");
@@ -27,15 +22,17 @@ public class Main {
 
         // 3. Start Server & Delegate Routes
         Javalin app = Javalin.create(config -> {
-            config.bundledPlugins.enableCors(cors -> cors.addRule(it -> it.anyHost()));
+            config.bundledPlugins.enableCors(cors -> {
+                // SECURITY: Replace anyHost() with your actual Netlify URL
+                cors.addRule(it -> it.allowHost("https://remarkable-hotteok-9a5dc2.netlify.app"));
+            });
 
-            // WE MOVED ALL ROUTES TO THE ROUTER CLASS
             new AppRouter(auth, game, geminiKey).setupRoutes(config);
 
-        }).start("0.0.0.0", 7070);
+        }).start("0.0.0.0", port); // Use the dynamic port variable here
 
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
-        System.out.println("🚀 Backend is LISTENING on http://localhost:7070/api/");
+        System.out.println("🚀 Backend is LISTENING on port " + port);
     }
 
     private static String getEnv(Dotenv dotenv, String key) {
