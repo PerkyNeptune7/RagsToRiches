@@ -2,7 +2,7 @@
 
 import { Key } from "readline";
 
-export const API_URL = "https://ragstoriches-sqlz.onrender.com/api";
+export const API_URL = "https://ragstoriches-sqlz.onrender.com";
 
 // ==========================================
 // 1. SHOP & ITEM TYPES
