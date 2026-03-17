@@ -49,8 +49,6 @@ public class GeminiService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 2. LOG THE RAW RESPONSE - This helps you see what's actually wrong!
-            System.out.println("Gemini Response: " + response.body());
 
             Map<String, Object> resMap = mapper.readValue(response.body(), Map.class);
 

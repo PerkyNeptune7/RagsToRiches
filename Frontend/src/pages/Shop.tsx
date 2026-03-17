@@ -1,31 +1,18 @@
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CharacterShop } from "@/components/game/CharacterShop";
-
-const USER_ID = "test_user_1";
+import { useAuth } from "@/components/auth/AuthContext";
 
 const Shop = () => {
     const navigate = useNavigate();
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        console.log("✅ Shop Page Mounted");
-        setMounted(true);
-    }, []);
-
-    if (!mounted) return <div className="p-10 text-red-500">Initializing Shop Route...</div>;
+    const { user: authUser } = useAuth();
 
     return (
-        <div className="w-full h-screen bg-slate-900 flex items-center justify-center">
-            {/* If CharacterShop crashes, this Error Boundary text won't show, 
-         but the console will catch it.
-      */}
+        <div className="w-full min-h-screen bg-gradient-to-b from-emerald-950 to-slate-950">
             <CharacterShop
-                userId={USER_ID}
-                onClose={() => {
-                    console.log("🔙 Closing Shop, returning Home");
-                    navigate('/');
-                }}
+                userId={authUser?.id ?? null}
+                isLoggedIn={!!authUser}
+                onClose={() => navigate('/')}
+                onSignInClick={() => navigate('/')}
             />
         </div>
     );

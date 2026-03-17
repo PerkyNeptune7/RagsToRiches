@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import { Choice } from '@/types/game';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -67,6 +68,8 @@ const rarityConfig = {
 
 export const GameCard = ({ choice, onClick, disabled, index = 0 }: GameCardProps) => {
 
+  const [flipped, setFlipped] = useState(false);
+
   const analyzeChoice = (c: Choice) => {
     const moneyVal = parseCash(c.effect.money);
     const financeVal = parseSymbol(c.effect.financeKnowledge);
@@ -98,6 +101,12 @@ export const GameCard = ({ choice, onClick, disabled, index = 0 }: GameCardProps
   const cfg = categoryConfig[category];
   const rarityInfo = rarityConfig[rarity];
 
+  // Run a one-time flip animation shortly after mount
+  useEffect(() => {
+    const timer = setTimeout(() => setFlipped(true), 400 + index * 80);
+    return () => clearTimeout(timer);
+  }, [index]);
+
   // Gold coin SVG used in the card front medallion
   const CoinSVG = () => (
     <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
@@ -122,7 +131,7 @@ export const GameCard = ({ choice, onClick, disabled, index = 0 }: GameCardProps
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay: index * 0.08, type: 'spring', stiffness: 200, damping: 20 }}
       className={cn(
-        'group h-[340px] w-full cursor-pointer',
+        'h-[340px] w-full cursor-pointer',
         '[perspective:1000px]',
         disabled && 'opacity-40 pointer-events-none grayscale'
       )}
@@ -133,7 +142,7 @@ export const GameCard = ({ choice, onClick, disabled, index = 0 }: GameCardProps
         className={cn(
           'relative h-full w-full rounded-2xl transition-transform duration-700',
           '[transform-style:preserve-3d]',
-          'group-hover:[transform:rotateY(180deg)]',
+          flipped && '[transform:rotateY(180deg)]',
           cfg.glow
         )}
       >

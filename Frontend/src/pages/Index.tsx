@@ -4,8 +4,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { HeroSection } from '@/components/game/HeroSection';
 import { GameBoard } from '@/components/game/GameBoard';
 import { Leaderboard } from '@/components/game/Leaderboard';
-import { Navigation } from '@/components/game/Navigation';
+import { Navigation, Page as NavPage } from '@/components/game/Navigation';
 import { TutorialSection } from '@/components/game/TutorialSection';
+import { CharacterShop } from '@/components/game/CharacterShop';
 // TYPES & API
 import { PlayerCharacter, BackendUser, SituationCard } from '@/types/game';
 import { api } from "@/hooks/Api";
@@ -14,7 +15,7 @@ import { AuthPanel } from '@/components/auth/AuthPanel'; // Make sure this path 
 import { useAuth } from '@/components/auth/AuthContext'; // Make sure this path is correct!
 import { Loader2 } from 'lucide-react';
 
-type Page = 'home' | 'play' | 'learn' | 'leaderboard';
+type Page = NavPage | 'leaderboard';
 
 const Index = () => {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -49,8 +50,7 @@ const Index = () => {
           overallScore: 0
         } as PlayerCharacter);
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Failed to load game data");
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ const Index = () => {
       try {
         await api.saveProfile(userToSave);
         toast.success("Progress Saved!");
-      } catch (err) {
+      } catch {
         toast.error("Failed to save progress to server.");
       }
     } else {
@@ -126,6 +126,16 @@ const Index = () => {
         )}
 
         {/* SHOP PAGE */}
+        {currentPage === 'shop' && (
+          <motion.div key="shop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="z-20 relative">
+            <CharacterShop
+              userId={authUser?.id ?? null}
+              isLoggedIn={!!authUser}
+              onClose={() => setCurrentPage('home')}
+              onSignInClick={() => setCurrentPage('home')}
+            />
+          </motion.div>
+        )}
 
         {/* LEARN PAGE */}
         {currentPage === 'learn' && (
@@ -134,7 +144,7 @@ const Index = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      <Navigation currentPage={currentPage} onNavigate={(p) => setCurrentPage(p as Page)} />
+      <Navigation currentPage={currentPage as NavPage} onNavigate={(p) => setCurrentPage(p)} />
     </div>
   );
 };

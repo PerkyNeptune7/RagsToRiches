@@ -13,9 +13,15 @@ export const PlayerCharacterComponent = ({
   size = 'lg'
 }: PlayerProps) => {
 
+  const outfitId = character.appearance?.outfit || 'default_outfit';
+  const hatId = character.appearance?.hat || 'none_hat';
+  const glassesId = character.appearance?.glasses || 'none_glasses';
+  const accessoryId = character.appearance?.accessory || 'none_accessory';
+
   const c = {
     skin: '#fca5a5',
-    shirt: '#3b82f6',
+    shirtDefault: '#3b82f6',
+    shirtHoodie: '#4f46e5',
     suit: '#1e293b',
     black: '#1f2937',
     gold: '#fbbf24',
@@ -351,12 +357,18 @@ export const PlayerCharacterComponent = ({
       <motion.g variants={bodyAnim} animate={mode} initial={false}>
         <rect
           x="65" y="110" width="70" height="80"
-          fill={character.outfit === 'business' ? c.suit : c.shirt}
+          fill={
+            outfitId === 'business_suit'
+              ? c.suit
+              : outfitId === 'cool_hoodie'
+              ? c.shirtHoodie
+              : c.shirtDefault
+          }
           stroke={c.black} strokeWidth="3.5"
           rx="6"
         />
         {/* Outfit details */}
-        {character.outfit === 'business' ? (
+        {outfitId === 'business_suit' ? (
           <g>
             <path d="M 100 110 L 100 165" stroke="#ef4444" strokeWidth="6" strokeLinecap="round" />
             <polygon points="100,110 94,125 100,122 106,125" fill="#ef4444" />
@@ -395,10 +407,10 @@ export const PlayerCharacterComponent = ({
           {renderSweat(mode)}
 
           {/* === ACCESSORIES === */}
-          {character.accessory === 'watch' && (
+          {accessoryId === 'gold_chain' && (
             <path d="M 80 110 Q 100 140 120 110" stroke={c.gold} strokeWidth="4.5" fill="none" strokeLinecap="round" />
           )}
-          {character.accessory === 'glasses' && (
+          {glassesId !== 'none_glasses' && (
             <g>
               <line x1="60" y1="65" x2="78" y2="65" stroke={c.black} strokeWidth="2.5" />
               <rect x="78" y="55" width="22" height="14" fill={c.black} opacity="0.85" rx="3" />
@@ -410,7 +422,7 @@ export const PlayerCharacterComponent = ({
               <line x1="103" y1="57" x2="107" y2="61" stroke="white" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
             </g>
           )}
-          {character.accessory === 'hat' && (
+          {hatId !== 'none_hat' && (
             <g>
               <path d="M 58 45 Q 100 8 142 45 L 145 52 H 55 Z" fill={c.cap} stroke={c.black} strokeWidth="2.5" />
               <rect x="55" y="45" width="90" height="10" fill={c.cap} stroke={c.black} strokeWidth="2" rx="2" />

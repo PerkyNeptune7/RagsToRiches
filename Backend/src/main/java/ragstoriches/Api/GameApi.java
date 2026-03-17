@@ -122,6 +122,11 @@ public class GameApi {
         if (user == null)
             throw new RuntimeException("User not found");
 
+        // Defensive: older users might not have inventory initialized
+        if (user.inventory == null) {
+            user.inventory = new ArrayList<>();
+        }
+
         GameWardrobe item = ITEM_CATALOG.get(itemId);
         if (item == null)
             throw new RuntimeException("Item not found");
@@ -145,6 +150,11 @@ public class GameApi {
         User user = getUser(userId);
         if (user == null)
             throw new RuntimeException("User not found");
+
+        // Defensive: older users might not have inventory initialized
+        if (user.inventory == null) {
+            user.inventory = new ArrayList<>();
+        }
 
         // Validate ownership (allow "default" or "none" items always)
         if (!itemId.contains("default") && !itemId.contains("none") && !user.inventory.contains(itemId)) {

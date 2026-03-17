@@ -1,5 +1,7 @@
 package ragstoriches;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import io.javalin.apibuilder.ApiBuilder;
@@ -46,8 +48,53 @@ public class AppRouter {
                 // GAME & AI ROUTES
                 ApiBuilder.get("cards", ctx -> ctx.json(game.getAllCards()));
 
+                // Profile (simple user CRUD without auth middleware for now)
+                ApiBuilder.get("profile/{userId}", ctx -> {
+                    String userId = ctx.pathParam("userId");
+                    User user = game.getUser(userId);
+                    if (user == null) {
+                        ctx.status(404).result("User not found");
+                    } else {
+                        ctx.json(user.withoutPassword());
+                    }
+                });
+
+                ApiBuilder.post("profile/save", ctx -> {
+                    User req = ctx.bodyAsClass(User.class);
+                    User saved = game.saveUser(req);
+                    ctx.json(saved.withoutPassword());
+                });
+
+                // Leaderboard
                 ApiBuilder.get("leaderboard", ctx -> {
                     ctx.json(game.getLeaderboard());
+                });
+
+                // Shop routes
+                ApiBuilder.get("shop/catalog", ctx -> {
+                    List<Map<String, Object>> items = new ArrayList<>();
+                    for (GameWardrobe item : GameApi.ITEM_CATALOG.values()) {
+                        items.add(Map.of(
+                                "id", item.id,
+                                "name", item.name,
+                                "type", item.type,
+                                "price", item.price,
+                                "knowledgeReq", item.knowledgeReq,
+                                "description", item.description != null ? item.description : ""));
+                    }
+                    ctx.json(items);
+                });
+
+                ApiBuilder.post("shop/buy", ctx -> {
+                    ShopRequest req = ctx.bodyAsClass(ShopRequest.class);
+                    User updated = game.buyItem(req.userId, req.itemId);
+                    ctx.json(updated.withoutPassword());
+                });
+
+                ApiBuilder.post("shop/equip", ctx -> {
+                    ShopRequest req = ctx.bodyAsClass(ShopRequest.class);
+                    User updated = game.equipItem(req.userId, req.itemId);
+                    ctx.json(updated.withoutPassword());
                 });
 
                 ApiBuilder.post("choose", ctx -> {
@@ -95,5 +142,10 @@ public class AppRouter {
         public String userId;
         public int situationId;
         public int choiceIndex;
+    }
+
+    public static class ShopRequest {
+        public String userId;
+        public String itemId;
     }
 }

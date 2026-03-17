@@ -13,6 +13,6 @@ WORKDIR /app
 # Copy the built JAR from Stage 1
 COPY --from=build /app/target/*.jar app.jar
 # Expose the port Javalin uses (usually 7070 or 8080)
-EXPOSE 8080
+EXPOSE 7070
 # Run the application
 CMD ["java", "-jar", "app.jar"]

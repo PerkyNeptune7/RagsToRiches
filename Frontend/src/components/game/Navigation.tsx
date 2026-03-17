@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
-import { Home, Gamepad2, BookOpen, Layers, ShoppingBag } from 'lucide-react';
+import { Home, Gamepad2, BookOpen, ShoppingBag } from 'lucide-react';
 import { cn } from '@/lib/utils';
-type Page = 'home' | 'play' | 'learn' | 'shop';
+
+export type Page = 'home' | 'play' | 'learn' | 'shop';
 
 interface NavigationProps {
   currentPage: Page;
@@ -12,6 +13,7 @@ const navItems = [
   { id: 'home' as Page, label: 'Home', icon: Home },
   { id: 'play' as Page, label: 'Play', icon: Gamepad2 },
   { id: 'learn' as Page, label: 'Learn', icon: BookOpen },
+  { id: 'shop' as Page, label: 'Shop', icon: ShoppingBag },
 ];
 
 export const Navigation = ({ currentPage, onNavigate }: NavigationProps) => {

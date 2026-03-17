@@ -2,7 +2,7 @@
 
 import { Key } from "readline";
 
-export const API_URL = "http://localhost:8080/api";
+export const API_URL = "http://localhost:7070/api";
 
 // ==========================================
 // 1. SHOP & ITEM TYPES

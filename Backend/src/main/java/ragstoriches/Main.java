@@ -32,10 +32,10 @@ public class Main {
             // WE MOVED ALL ROUTES TO THE ROUTER CLASS
             new AppRouter(auth, game, geminiKey).setupRoutes(config);
 
-        }).start("0.0.0.0", 8080);
+        }).start("0.0.0.0", 7070);
 
         Runtime.getRuntime().addShutdownHook(new Thread(app::stop));
-        System.out.println("🚀 Backend is LISTENING on http://localhost:8080/api/");
+        System.out.println("🚀 Backend is LISTENING on http://localhost:7070/api/");
     }
 
     private static String getEnv(Dotenv dotenv, String key) {
