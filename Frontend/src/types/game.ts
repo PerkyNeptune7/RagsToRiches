@@ -2,7 +2,7 @@
 
 import { Key } from "readline";
 
-export const API_URL = "https://ragstoriches-sqlz.onrender.com";
+export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:7070";
 
 // ==========================================
 // 1. SHOP & ITEM TYPES
