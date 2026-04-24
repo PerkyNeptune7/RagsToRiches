@@ -69,7 +69,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
   const [gameOver, setGameOver] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [hasAskedCoach, setHasAskedCoach] = useState(false);
-  const [lastChoiceContext, setLastChoiceContext] = useState<{ situationTitle: string; choiceText: string; impact: string; quality: string } | null>(null);
+  const [lastChoiceContext, setLastChoiceContext] = useState<{ situationId: number; choiceIndex: number; quality: string } | null>(null);
   const [autoExplainCoach, setAutoExplainCoach] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [playerReaction, setPlayerReaction] = useState<'neutral' | 'happy' | 'thinking' | 'sad'>('neutral');
@@ -165,24 +165,22 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
 
       if (isWorstChoice) {
         setLastChoiceContext({
-          situationTitle: activeCard.scenario,
-          choiceText: choice.text,
-          impact: choice.impactDescription || "Processed turn",
+          situationId: activeCard.situationId,
+          choiceIndex: choiceIndex,
           quality,
         });
-        setAutoExplainCoach(true);
+        setAutoExplainCoach(isWorstChoice);
         setIsProcessing(false);
         return;
       }
 
       if (isMiddleChoice) {
         setLastChoiceContext({
-          situationTitle: activeCard.scenario,
-          choiceText: choice.text,
-          impact: choice.impactDescription || "Processed turn",
+          situationId: activeCard.situationId,
+          choiceIndex: choiceIndex,
           quality,
         });
-        setAutoExplainCoach(false);
+        setAutoExplainCoach(IsMiddleChoice);
         timerRef.current = setTimeout(() => {
           setIsProcessing(false);
           setBattleMessage('');
