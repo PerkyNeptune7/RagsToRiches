@@ -49,7 +49,7 @@ export interface SituationCard {
   id?: string | number;
   _id?: string;
   situationId: number;
-  type?: 'situation' | 'narrative'; // <-- NEW
+  type?: 'situation' | 'narrative' | 'end'; // <-- NEW
   title?: string; // <-- NEW
   year?: number;  // <-- NEW
   scenario: string;
