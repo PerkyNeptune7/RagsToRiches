@@ -92,7 +92,6 @@ export const learnContent: LearnCategory[] = [
   {
     id: "investment",
     title: "Investment",
-    intro: "Master these core concepts to make your money work for you, navigate the stock market with confidence, and secure your financial future!",
     cardInfo: {
       iconName: "LineChart",
       color: "text-violet-400",
@@ -232,7 +231,6 @@ export const learnContent: LearnCategory[] = [
   {
     id: "consumer-behaviour",
     title: "Consumer Behaviour",
-    intro: "Master your mindset to avoid marketing traps, eliminate impulsive spending, and make deliberate choices that build true wealth!",
     cardInfo: {
       iconName: "TrendingDown",
       color: "text-rose-400",
@@ -461,7 +459,6 @@ export const learnContent: LearnCategory[] = [
   {
     id: "taxes",
     title: "Taxes",
-    intro: "Master these core concepts to navigate the Canadian tax system, maximize your returns, and keep more of your hard-earned money in the game!",
     cardInfo: {
       iconName: "FileText",
       color: "text-emerald-200",
@@ -529,7 +526,6 @@ export const learnContent: LearnCategory[] = [
   {
     id: "credit-score",
     title: "Credit Score",
-    intro: "Learn About Debt & Credit: Master these core concepts to build a strong financial reputation, avoid expensive debt traps, and win the game!",
     cardInfo: {
       iconName: "CreditCard",
       color: "text-fuchsia-400",
