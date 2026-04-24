@@ -42,6 +42,14 @@ export const learnContent: LearnCategory[] = [
     },
     sections: [
       {
+        heading: "YorkU Career Compass",
+        content: [
+          "To be smart with your money you need an income...",
+          "Check out the YorkU CareerCompass, a job matching tool built for York University students seeking Work/Study opportunities, made by another C4 team!",
+          "**https://yucareercompass.com/**"
+        ]
+      },
+      {
         heading: "Setting SMART Financial Goals",
         content: [
           "First, evaluate your personal values to ensure your goals align with them. Without alignment, your budget will lack purpose. To make your financial goals actionable rather than just vague aspirations, they should be SMART: Specific, Measurable, Achievable, Relevant, and Timely. By giving a goal a specific timeframe and measurable cost, you can determine exactly what steps are required to achieve it."
@@ -312,11 +320,11 @@ export const learnContent: LearnCategory[] = [
         content: [
           "As a first-time applicant, it is best to start through your school’s scholarship portal. They often offer many types of financial aid for incoming and current students. The government of Canada also offers scholarships, bursaries, and awards for post-secondary students through their portal. Another great place to find scholarships is through Ontario Universities INFO, where they offer opportunities for every category, from indigenous scholarships to GPA scholarships.",
           "Below you will find some of these institutions’ portals:",
-          "● https://students.yorku.ca/sfs/scholarships-awards-bursaries",
-          "● https://www.yorku.ca/laps/student-awards/",
-          "● https://www.ouinfo.ca/scholarships",
-          "● https://studentawards.com/",
-          "● https://www.scholarshipscanada.com/"
+          " https://students.yorku.ca/sfs/scholarships-awards-bursaries",
+          " https://www.yorku.ca/laps/student-awards/",
+          " https://www.ouinfo.ca/scholarships",
+          " https://studentawards.com/",
+          " https://www.scholarshipscanada.com/"
         ]
       },
       {
