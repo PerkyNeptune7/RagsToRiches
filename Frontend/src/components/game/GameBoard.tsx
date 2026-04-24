@@ -345,7 +345,7 @@ const NarrativeView = ({ card, onContinue }: { card: SituationCard, onContinue: 
           onClick={onContinue}
           className="bg-primary hover:bg-emerald-400 text-emerald-950 font-black text-lg py-4 px-10 rounded-full shadow-[0_4px_20px_rgba(52,211,153,0.4)] flex items-center justify-center gap-3 mx-auto transition-all"
         >
-          Begin Chapter <ArrowRight className="w-6 h-6" />
+          Continue <ArrowRight className="w-6 h-6" />
         </motion.button>
       </div>
     </motion.div>
