@@ -114,6 +114,7 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
     setIsProcessing(false); setHasAskedCoach(true);
   };
 
+  /* original code
   const handleChoice = async (choice: Choice, choiceIndex: number) => {
     if (gameOver || isProcessing) return;
     setIsProcessing(true);
@@ -128,6 +129,20 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
     try {
       const updatedUser = await api.makeChoice(playerCharacter.id, activeCard.situationId, choiceIndex);
       if (!updatedUser) throw new Error("Failed to process turn");
+
+      if (updatedUser) {
+        setStats(updatedUser.stats);
+        setCurrentScore(updatedUser.overallScore);
+      } else {
+        // Local calculation fallback
+        const scoreToAdd = optionScore(choice);
+        setCurrentScore(prev => prev + scoreToAdd);
+        setStats(prev => ({
+          money: prev.money + (Number(choice.effect.money) || 0),
+          happiness: prev.happiness + getSymbolMultiplier(choice.effect.happiness),
+          financeKnowledge: prev.financeKnowledge + getSymbolMultiplier(choice.effect.financeKnowledge)
+        }));
+      }
 
       setStats(updatedUser.stats);
       setCurrentScore(updatedUser.overallScore);
@@ -195,6 +210,89 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
       setLastChoiceContext(null);
       setAutoExplainCoach(false);
       setIsProcessing(false);
+    }
+  };
+  */
+
+  const handleChoice = async (choice: Choice, choiceIndex: number) => {
+    if (gameOver || isProcessing) return;
+    setIsProcessing(true);
+    setPlayerReaction('thinking');
+
+    const { bestIndex, worstIndex } = getBestAndWorstIndex(activeCard.options);
+    const isBestChoice = choiceIndex === bestIndex;
+    const isWorstChoice = choiceIndex === worstIndex;
+    const quality = isBestChoice ? 'best' : isWorstChoice ? 'worst' : 'ok';
+
+    // Setup the context so the user CAN click the button (or auto-ask) after the choice
+    setLastChoiceContext({
+      situationId: activeCard.situationId,
+      choiceIndex: choiceIndex,
+      quality,
+    });
+    setAutoExplainCoach(isWorstChoice);
+
+    try {
+      const updatedUser = await api.makeChoice(playerCharacter.id, activeCard.situationId, choiceIndex);
+      
+      // Fallback local calculation if backend fails (e.g. API down or user is guest)
+      if (updatedUser) {
+        setStats(updatedUser.stats);
+        setCurrentScore(updatedUser.overallScore);
+      } else {
+        // Local calculation fallback
+        const scoreToAdd = optionScore(choice);
+        setCurrentScore(prev => prev + scoreToAdd);
+        setStats(prev => ({
+          money: prev.money + (Number(choice.effect.money) || 0),
+          happiness: prev.happiness + getSymbolMultiplier(choice.effect.happiness),
+          financeKnowledge: prev.financeKnowledge + getSymbolMultiplier(choice.effect.financeKnowledge)
+        }));
+      }
+
+      // Battle Logic
+      if (choiceIndex === bestIndex) {
+        setPlayerReaction('happy');
+        const damage = 20; // Flat damage fallback
+        setDamageDealt(damage);
+        setEvilHealth(prev => Math.max(0, prev - damage));
+        setBattleMessage('🏆 Perfect Choice!');
+      } else if (choiceIndex === worstIndex) {
+        setIsEvilAttacking(true);
+        setPlayerReaction('sad');
+        setBattleMessage(`😈 Oh no! ${evilCharacter?.name || 'The enemy'} is gaining power!`);
+      } else {
+        setBattleMessage('👍 Decent choice.');
+      }
+
+      // Stop villain/character "dancing" after 2 seconds
+      setTimeout(() => {
+        setIsEvilAttacking(false);
+        setDamageDealt(undefined);
+        setPlayerReaction('neutral');
+      }, 2000);
+
+      // If it's NOT the worst choice, start the 3-second auto-advance window
+      if (!isWorstChoice) {
+        timerRef.current = setTimeout(() => {
+          setIsProcessing(false);
+          setBattleMessage('');
+          setIsEvilAttacking(false);
+          setDamageDealt(undefined);
+
+          // AUTO ADVANCE: Only happens if they didn't click "Ask Coach"
+          advanceGame();
+        }, 3000);
+      } else {
+        // For worst choices, let the villain dance and the coach auto-explain,
+        // but keep the player in control of when to continue.
+        setIsProcessing(false);
+      }
+
+    } catch (error) {
+      console.error("Turn failed", error);
+      setIsProcessing(false);
+      advanceGame(); // Force advance on complete failure so game doesn't softlock
     }
   };
 
