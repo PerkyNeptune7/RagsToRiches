@@ -165,8 +165,9 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
 
       if (isWorstChoice) {
         setLastChoiceContext({
-          situationId: activeCard.situationId,
-          choiceIndex: choiceIndex,
+          situationTitle: activeCard.scenario,
+          choiceText: choice.text,
+          impact: choice.impactDescription || "Processed turn",
           quality,
         });
         setAutoExplainCoach(isWorstChoice);
@@ -176,8 +177,9 @@ export const GameBoard = ({ playerCharacter, cards, onGameEnd, onExit }: GameBoa
 
       if (isMiddleChoice) {
         setLastChoiceContext({
-          situationId: activeCard.situationId,
-          choiceIndex: choiceIndex,
+          situationTitle: activeCard.scenario,
+          choiceText: choice.text,
+          impact: choice.impactDescription || "Processed turn",
           quality,
         });
         setAutoExplainCoach(IsMiddleChoice);
