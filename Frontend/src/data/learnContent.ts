@@ -3,10 +3,21 @@ export type Section = {
   content: string[];
 };
 
+export type CardInfo = {
+  iconName: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  hoverBorder: string;
+  description: string;
+  tips: string[];
+};
+
 export type LearnCategory = {
   id: string;
   title: string;
   intro?: string;
+  cardInfo: CardInfo;
   sections: Section[];
   links: string[];
   table?: {
@@ -17,9 +28,80 @@ export type LearnCategory = {
 
 export const learnContent: LearnCategory[] = [
   {
+    id: "general-pfl",
+    title: "General PFL",
+    intro: "Personal financial planning is the process of managing your money to achieve personal economic satisfaction. Doing so provides significant advantages, including increased control over your resources, healthier personal relationships, and reduced stress. Here are some tips on how to build a financial strategy based on YOUR values and goals.",
+    cardInfo: {
+      iconName: "Target",
+      color: "text-emerald-400",
+      bgColor: "bg-emerald-400/10",
+      borderColor: "border-emerald-400/20",
+      hoverBorder: "group-hover:border-emerald-400/50",
+      description: "Personal financial planning is the process of managing your money to achieve personal economic satisfaction.",
+      tips: ["Set SMART goals", "Measure your financial health", "Shift to a spending plan"]
+    },
+    sections: [
+      {
+        heading: "Setting SMART Financial Goals",
+        content: [
+          "First, evaluate your personal values to ensure your goals align with them. Without alignment, your budget will lack purpose. To make your financial goals actionable rather than just vague aspirations, they should be SMART: Specific, Measurable, Achievable, Relevant, and Timely. By giving a goal a specific timeframe and measurable cost, you can determine exactly what steps are required to achieve it."
+        ]
+      },
+      {
+        heading: "Measuring Your Financial Health",
+        content: [
+          "To understand your current situation, familiarize yourself with two key personal financial statements.",
+          "A **cash flow statement** summarizes your cash receipts and payments over a period of time, revealing your monthly surplus or deficit.",
+          "A **balance sheet** provides a snapshot of what you own (assets) and what you owe (liabilities) to determine your overall net worth.",
+          "You can further evaluate your standing using financial ratios, which act as measurement tools for your finances:",
+          "**Savings Ratio**: You should aim to save 10% or more of your gross income each month.",
+          "**Liquidity Ratio**: You should ideally have enough liquid assets to cover 3 to 6 months of living expenses in case your income ceases.",
+          "**Debt Payments Ratio**: A healthy ratio means 20% or less of your take-home pay goes toward monthly debt repayments."
+        ]
+      },
+      {
+        heading: "Shifting from a Budget to a Spending Plan",
+        content: [
+          "Many people struggle with traditional budgeting because it feels restrictive and is unpleasant to monitor. Furthermore, people are often bad at predicting their own behavior and terrible at imagining future expenses.",
+          "For success, shift your mindset from a budget to a \"spending plan\". A spending plan promotes intentional spending and saving, allowing a remainder of money for you to spend how you choose.",
+          "**Best Practices for Spending Plans:**",
+          "**Pay Yourself First**: Commit to forced, automatic monthly savings directed toward your goals before spending on discretionary items.",
+          "**Automate**: Set up automatic regular savings deposits from your chequing to your savings accounts, eventually working up to a 20% savings rate.",
+          "**Use Savings \"Buckets\"**: Maintain separate savings accounts for distinct purposes, such as an emergency fund, annual fixed expenses, and specific goals."
+        ]
+      },
+      {
+        heading: "Learn the Economy & Time Value of Money",
+        content: [
+          "Master how broader economic trends and the mathematics of interest dictate your financial success.",
+          "**Economic Factors** Understanding the broader economy helps protect your wallet. Inflation and consumer behavior directly influence your purchasing power and job stability.",
+          "**Track your purchasing power**: Monitor inflation, which is a rise in the general level of prices that reduces the overall value of the dollar.",
+          "**Protect vulnerable assets**: Recognize that rising inflation is particularly harmful to individuals who are living on fixed incomes.",
+          "**Watch the job market**: Understand that overall consumer spending drives the demand for goods, which directly influences employment opportunities.",
+          "**Time Value of Money (TVM)** The Time Value of Money refers to the mathematical increase in an amount of money as a result of interest earned over a period of time.",
+          "**Accelerate your wealth**: Utilize compound interest, which accelerates growth by allowing you to earn interest on previously earned interest.",
+          "**Look ahead**: Calculate the Future Value (FV) to determine what your current savings or annuity payments will be worth later based on a specific interest rate.",
+          "**Work backward**: Calculate the Present Value (PV) to figure out exactly how much you must deposit today to achieve a specific, desired financial goal in the future."
+        ]
+      }
+    ],
+    links: [
+      "https://www.fca.org.uk/investsmart/understanding-high-risk-investments"
+    ]
+  },
+  {
     id: "investment",
     title: "Investment",
     intro: "Master these core concepts to make your money work for you, navigate the stock market with confidence, and secure your financial future!",
+    cardInfo: {
+      iconName: "LineChart",
+      color: "text-violet-400",
+      bgColor: "bg-violet-400/10",
+      borderColor: "border-violet-400/20",
+      hoverBorder: "group-hover:border-violet-400/50",
+      description: "Make your money work for you! Investments can grow over time through compound interest.",
+      tips: ["Start early - time is your friend", "Diversify your portfolio", "Learn before you invest"]
+    },
     sections: [
       {
         heading: "Saving vs. Investing & The Rule of 6%",
@@ -84,61 +166,17 @@ export const learnContent: LearnCategory[] = [
     ]
   },
   {
-    id: "general-pfl",
-    title: "General PFL",
-    intro: "Personal financial planning is the process of managing your money to achieve personal economic satisfaction. Doing so provides significant advantages, including increased control over your resources, healthier personal relationships, and reduced stress. Here are some tips on how to build a financial strategy based on YOUR values and goals.",
-    sections: [
-      {
-        heading: "Setting SMART Financial Goals",
-        content: [
-          "First, evaluate your personal values to ensure your goals align with them. Without alignment, your budget will lack purpose. To make your financial goals actionable rather than just vague aspirations, they should be SMART: Specific, Measurable, Achievable, Relevant, and Timely. By giving a goal a specific timeframe and measurable cost, you can determine exactly what steps are required to achieve it."
-        ]
-      },
-      {
-        heading: "Measuring Your Financial Health",
-        content: [
-          "To understand your current situation, familiarize yourself with two key personal financial statements.",
-          "A **cash flow statement** summarizes your cash receipts and payments over a period of time, revealing your monthly surplus or deficit.",
-          "A **balance sheet** provides a snapshot of what you own (assets) and what you owe (liabilities) to determine your overall net worth.",
-          "You can further evaluate your standing using financial ratios, which act as measurement tools for your finances:",
-          "**Savings Ratio**: You should aim to save 10% or more of your gross income each month.",
-          "**Liquidity Ratio**: You should ideally have enough liquid assets to cover 3 to 6 months of living expenses in case your income ceases.",
-          "**Debt Payments Ratio**: A healthy ratio means 20% or less of your take-home pay goes toward monthly debt repayments."
-        ]
-      },
-      {
-        heading: "Shifting from a Budget to a Spending Plan",
-        content: [
-          "Many people struggle with traditional budgeting because it feels restrictive and is unpleasant to monitor. Furthermore, people are often bad at predicting their own behavior and terrible at imagining future expenses.",
-          "For success, shift your mindset from a budget to a \"spending plan\". A spending plan promotes intentional spending and saving, allowing a remainder of money for you to spend how you choose.",
-          "**Best Practices for Spending Plans:**",
-          "**Pay Yourself First**: Commit to forced, automatic monthly savings directed toward your goals before spending on discretionary items.",
-          "**Automate**: Set up automatic regular savings deposits from your chequing to your savings accounts, eventually working up to a 20% savings rate.",
-          "**Use Savings \"Buckets\"**: Maintain separate savings accounts for distinct purposes, such as an emergency fund, annual fixed expenses, and specific goals."
-        ]
-      },
-      {
-        heading: "Learn the Economy & Time Value of Money",
-        content: [
-          "Master how broader economic trends and the mathematics of interest dictate your financial success.",
-          "**Economic Factors** Understanding the broader economy helps protect your wallet. Inflation and consumer behavior directly influence your purchasing power and job stability.",
-          "**Track your purchasing power**: Monitor inflation, which is a rise in the general level of prices that reduces the overall value of the dollar.",
-          "**Protect vulnerable assets**: Recognize that rising inflation is particularly harmful to individuals who are living on fixed incomes.",
-          "**Watch the job market**: Understand that overall consumer spending drives the demand for goods, which directly influences employment opportunities.",
-          "**Time Value of Money (TVM)** The Time Value of Money refers to the mathematical increase in an amount of money as a result of interest earned over a period of time.",
-          "**Accelerate your wealth**: Utilize compound interest, which accelerates growth by allowing you to earn interest on previously earned interest.",
-          "**Look ahead**: Calculate the Future Value (FV) to determine what your current savings or annuity payments will be worth later based on a specific interest rate.",
-          "**Work backward**: Calculate the Present Value (PV) to figure out exactly how much you must deposit today to achieve a specific, desired financial goal in the future."
-        ]
-      }
-    ],
-    links: [
-      "https://www.fca.org.uk/investsmart/understanding-high-risk-investments"
-    ]
-  },
-  {
     id: "budgeting",
     title: "Budgeting",
+    cardInfo: {
+      iconName: "PieChart",
+      color: "text-sky-400",
+      bgColor: "bg-sky-400/10",
+      borderColor: "border-sky-400/20",
+      hoverBorder: "group-hover:border-sky-400/50",
+      description: "Balance your needs, wants, and savings. Smart spending means knowing the difference!",
+      tips: ["50/30/20 Rule", "Avoid Lifestyle Creep", "Use savings buckets"]
+    },
     sections: [
       {
         heading: "The 50/30/20 Rule (The Classic)",
@@ -195,6 +233,15 @@ export const learnContent: LearnCategory[] = [
     id: "consumer-behaviour",
     title: "Consumer Behaviour",
     intro: "Master your mindset to avoid marketing traps, eliminate impulsive spending, and make deliberate choices that build true wealth!",
+    cardInfo: {
+      iconName: "TrendingDown",
+      color: "text-rose-400",
+      bgColor: "bg-rose-400/10",
+      borderColor: "border-rose-400/20",
+      hoverBorder: "group-hover:border-rose-400/50",
+      description: "Master your mindset to avoid marketing traps and eliminate impulsive spending.",
+      tips: ["Beware of FOMO", "Hit the Pause Button", "Limit Social Media"]
+    },
     sections: [
       {
         heading: "Financial Mindfulness",
@@ -237,7 +284,16 @@ export const learnContent: LearnCategory[] = [
   },
   {
     id: "student-loans",
-    title: "Student Loans & Financial Aid",
+    title: "Student Loans & Aid",
+    cardInfo: {
+      iconName: "Landmark",
+      color: "text-blue-400",
+      bgColor: "bg-blue-400/10",
+      borderColor: "border-blue-400/20",
+      hoverBorder: "group-hover:border-blue-400/50",
+      description: "Navigate scholarships, awards, bursaries, and grants to fund your education safely.",
+      tips: ["Track application deadlines", "Check school portals", "Read all requirements"]
+    },
     sections: [
       {
         heading: "Scholarships, Awards and Bursaries",
@@ -289,6 +345,15 @@ export const learnContent: LearnCategory[] = [
     id: "scams",
     title: "Scams",
     intro: "Not every financial opportunity is legitimate. Master these core concepts to recognize red flags, protect your capital, and safely manage your money!",
+    cardInfo: {
+      iconName: "ShieldAlert",
+      color: "text-red-400",
+      bgColor: "bg-red-400/10",
+      borderColor: "border-red-400/20",
+      hoverBorder: "group-hover:border-red-400/50",
+      description: "Recognize red flags, protect your capital, and avoid get-rich-quick schemes.",
+      tips: ["If it sounds too good to be true, it is", "Beware of pyramid schemes", "Check for counterfeit bills"]
+    },
     sections: [
       {
         heading: "Spotting Pyramid Schemes",
@@ -334,11 +399,20 @@ export const learnContent: LearnCategory[] = [
   {
     id: "savings",
     title: "Savings",
+    cardInfo: {
+      iconName: "PiggyBank",
+      color: "text-amber-400",
+      bgColor: "bg-amber-400/10",
+      borderColor: "border-amber-400/20",
+      hoverBorder: "group-hover:border-amber-400/50",
+      description: "Money set aside for future goals and emergencies. Pay yourself first!",
+      tips: ["Calculate what you can afford", "Use Tax-Advantaged Accounts", "Weigh renting vs buying"]
+    },
     sections: [
       {
         heading: "Calculating What You Can Afford",
         content: [
-          "One of the biggest mistakes mistakes buyers make is confusing how much a bank will loan them with how much they can actually afford.",
+          "One of the biggest mistakes buyers make is confusing how much a bank will loan them with how much they can actually afford.",
           "**The 40% Rule**: A general rule of thumb is that no more than 40% of your pre-tax monthly earnings should go toward debt payments, including your mortgage, credit cards, and student loans.",
           "**Down Payment Minimums**: The minimum down payment is 5% for homes up to $500,000. For homes between $500,000 and $1 million, you need 5% on the first $500K and 10% on the remainder. Homes over $1 million require at least 20%.",
           "**The 20% Advantage**: Even if it isn't required, scraping together a 20% down payment allows you to avoid paying for expensive mortgage insurance and protects you if property values decline."
@@ -388,6 +462,15 @@ export const learnContent: LearnCategory[] = [
     id: "taxes",
     title: "Taxes",
     intro: "Master these core concepts to navigate the Canadian tax system, maximize your returns, and keep more of your hard-earned money in the game!",
+    cardInfo: {
+      iconName: "FileText",
+      color: "text-emerald-200",
+      bgColor: "bg-emerald-200/10",
+      borderColor: "border-emerald-200/20",
+      hoverBorder: "group-hover:border-emerald-200/50",
+      description: "Navigate the tax system, maximize your returns, and keep more of your money.",
+      tips: ["Understand Marginal vs Average", "Know Deductions vs Credits", "Utilize TFSA & RRSP"]
+    },
     sections: [
       {
         heading: "Understanding Income Tax",
@@ -447,6 +530,15 @@ export const learnContent: LearnCategory[] = [
     id: "credit-score",
     title: "Credit Score",
     intro: "Learn About Debt & Credit: Master these core concepts to build a strong financial reputation, avoid expensive debt traps, and win the game!",
+    cardInfo: {
+      iconName: "CreditCard",
+      color: "text-fuchsia-400",
+      bgColor: "bg-fuchsia-400/10",
+      borderColor: "border-fuchsia-400/20",
+      hoverBorder: "group-hover:border-fuchsia-400/50",
+      description: "Build a strong financial reputation and avoid expensive debt traps.",
+      tips: ["Understand Good vs Bad Debt", "Pay on time, always", "Keep credit utilization low"]
+    },
     sections: [
       {
         heading: "Understanding Credit",
