@@ -215,7 +215,7 @@ export const learnContent: LearnCategory[] = [
       {
         heading: "5-STEP BUDGETING PLAN",
         content: [
-          "**Step 1: Add your expenses and income.** You've already done this step if you created a cash flow statement (see Chapter 3). If not, calculate your total income and expenses to see if you're covering all your costs.",
+          "**Step 1: Add your expenses and income.** You've already done this step if you created a cash flow statement. If not, calculate your total income and expenses to see if you're covering all your costs.",
           "**Step 2: Review your categories.** Now look at how much you're spending in each category. Does what you're spending make sense? Perhaps you didn't realize just how much those visits to Winners were costing you.",
           "**Step 3: Create a category for savings.** Most budgeters forget to account for savings. It's not really an expense, but it is money you need to deduct from your paycheque every month Allocate some of your income to this category.",
           "**Step 4: Examine your goals.** In the context of all your other savings and spending, see how much it will cost to achieve your many goals.",
